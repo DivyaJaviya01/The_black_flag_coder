@@ -3,7 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MongoDB College Data Explorer</title>
+  <title>Vishal Collection Data Explorer</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+    .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .control-group { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
+    input, select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .data-container { background: white; padding: 20px; border-radius: 8px; min-height: 300px; }
+    .data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+    .data-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+    .data-title { font-weight: bold; color: #333; margin-bottom: 10px; }
+    .json-view { background: #f8f8f8; padding: 15px; border-radius: 4px; white-space: pre-wrap; font-family: monospace; max-height: 400px; overflow-y: auto; }
+    .error { color: red; background: #ffe6e6; padding: 15px; border-radius: 4px; }
+    .loading { text-align: center; color: #666; padding: 50px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 Vishal Collection Explorer</h1>
+    <p>Explore data from the Vishal collection with schema analysis</p>
+  </div>
+  
+  <div class="controls">
+    <div class="control-group">
+      <label>Search:</label>
+      <input type="text" id="search" placeholder="Search data...">
+      
+      <label>Limit:</label>
+      <select id="limit">
+        <option value="">All</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+      </select>
+      
+      <button onclick="loadData()">Load Data</button>
+      <button onclick="toggleView()">Toggle View</button>
+    </div>
+  </div>
+  
+  <div class="data-container" id="data-container">
+    <p class="loading">Click "Load Data" to fetch data from the Vishal collection...</p>
+  </div>
+
+  <script>
+    let currentData = [];
+    let isJsonView = false;
+    
+    async function loadData() {
+      const container = document.getElementById('data-container');
+      container.innerHTML = '<p class="loading">Loading data...</p>';
+      
+      try {
+        const search = document.getElementById('search').value;
+        const limit = document.getElementById('limit').value;
+        
+        let url = 'http://localhost:3001/api/vishal';
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (limit) params.append('limit', limit);
+        if (params.toString()) url += '?' + params.toString();
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success) {
+          currentData = result.data;
+          displayData(result);
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        container.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+      }
+    }
+    
+    function displayData(result) {
+      const container = document.getElementById('data-container');
+      
+      if (result.data.length === 0) {
+        container.innerHTML = '<p class="loading">No data found.</p>';
+        return;
+      }
+      
+      if (isJsonView) {
+        container.innerHTML = `
+          <h3>JSON Data (${result.count} records)</h3>
+          <div class="json-view">${JSON.stringify(result.data, null, 2)}</div>
+        `;
+      } else {
+        const cards = result.data.map(item => {
+          const title = item.name || item.title || item._id || 'Untitled';
+          const details = Object.entries(item)
+            .filter(([key]) => key !== '_id' && key !== 'name' && key !== 'title')
+            .map(([key, value]) => `<strong>${key}:</strong> ${typeof value === 'object' ? JSON.stringify(value) : value}`)
+            .join('<br>');
+          
+          return `
+            <div class="data-card">
+              <div class="data-title">${title}</div>
+              <div>${details || 'No additional data'}</div>
+            </div>
+          `;
+        }).join('');
+        
+        container.innerHTML = `
+          <h3>Data Results (${result.count} found)</h3>
+          <div class="data-grid">${cards}</div>
+        `;
+      }
+    }
+    
+    function toggleView() {
+      isJsonView = !isJsonView;
+      if (currentData.length > 0) {
+        displayData({ data: currentData, count: currentData.length, success: true });
+      }
+    }
+    
+    document.getElementById('search').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loadData();
+    });
+  </script>
+</body>
+</html>
   <style>
     * {
       margin: 0;
@@ -252,203 +378,3 @@
         </select>
       </div>
       
-      <div class="control-group">
-        <label for="sort-by">Sort by:</label>
-        <select id="sort-by">
-          <option value="">Default</option>
-          <option value="name">College Name</option>
-          <option value="location">Location</option>
-        </select>
-        
-        <label for="sort-order">Order:</label>
-        <select id="sort-order">
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-        
-        <button onclick="loadData()">Search</button>
-        <button onclick="clearFilters()">Clear</button>
-        <button onclick="toggleView()">Toggle View</button>
-      </div>
-    </div>
-    
-    <div class="stats" id="stats" style="display: none;">
-      <div class="stat-item">
-        <div class="stat-number" id="total-count">0</div>
-        <div class="stat-label">Total Results</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number" id="location-count">0</div>
-        <div class="stat-label">Locations</div>
-      </div>
-    </div>
-    
-    <div class="data-container" id="data-container">
-      <p class="loading">Click "Search" to load data from the server...</p>
-    </div>
-  </div>
-
-  <script>
-    let currentData = [];
-    let allLocations = [];
-    let viewMode = 'cards'; // 'cards' or 'json'
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      loadLocations();
-      
-      // Add enter key support for search
-      document.getElementById('search').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          loadData();
-        }
-      });
-    });
-    
-    async function loadLocations() {
-      try {
-        const response = await fetch('http://localhost:3001/api/colleges/locations');
-        if (!response.ok) throw new Error('Failed to load locations');
-        
-        const result = await response.json();
-        if (result.success) {
-          allLocations = result.data;
-          const locationSelect = document.getElementById('location-filter');
-          
-          result.data.forEach(location => {
-            const option = document.createElement('option');
-            option.value = location;
-            option.textContent = location;
-            locationSelect.appendChild(option);
-          });
-        }
-      } catch (error) {
-        console.error('Error loading locations:', error);
-      }
-    }
-    
-    async function loadData() {
-      const dataContainer = document.getElementById('data-container');
-      const statsContainer = document.getElementById('stats');
-      
-      // Show loading state
-      dataContainer.innerHTML = '<p class="loading">Loading data from the server...</p>';
-      statsContainer.style.display = 'none';
-      
-      try {
-        // Build query parameters
-        const params = new URLSearchParams();
-        
-        const search = document.getElementById('search').value.trim();
-        const locationFilter = document.getElementById('location-filter').value;
-        const limit = document.getElementById('limit').value;
-        const sortBy = document.getElementById('sort-by').value;
-        const sortOrder = document.getElementById('sort-order').value;
-        
-        if (search) params.append('search', search);
-        if (limit) params.append('limit', limit);
-        if (sortBy) params.append('sortBy', sortBy);
-        if (sortOrder && sortBy) params.append('sortOrder', sortOrder);
-        
-        // Choose endpoint based on filters
-        let url = 'http://localhost:3001/api/data';
-        if (locationFilter && !search) {
-          url = `http://localhost:3001/api/colleges/location/${encodeURIComponent(locationFilter)}`;
-        } else if (params.toString()) {
-          url += '?' + params.toString();
-        }
-        
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          currentData = result.data;
-          displayData(result);
-          updateStats(result);
-        } else {
-          throw new Error(result.message || 'Failed to fetch data');
-        }
-        
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        dataContainer.innerHTML = `
-          <div class="error">
-            <strong>Failed to load data!</strong><br>
-            ${error.message}<br>
-            <small>Make sure the backend server is running on http://localhost:3001</small>
-          </div>
-        `;
-      }
-    }
-    
-    function displayData(result) {
-      const dataContainer = document.getElementById('data-container');
-      
-      if (viewMode === 'json') {
-        dataContainer.innerHTML = `
-          <h3>JSON Data (${result.count} records)</h3>
-          <div class="json-view">${JSON.stringify(result, null, 2)}</div>
-        `;
-      } else {
-        if (result.data.length === 0) {
-          dataContainer.innerHTML = '<p class="loading">No colleges found matching your criteria.</p>';
-          return;
-        }
-        
-        const cardsHtml = result.data.map(college => `
-          <div class="college-card">
-            <div class="college-name">${college['name'] || 'N/A'}</div>
-            <div class="college-details">
-              <strong>Location:</strong> ${college['location'] || 'N/A'}<br>
-              ${college['website'] ? `<strong>Website:</strong> <a href="${college['website']}" target="_blank">${college['website']}</a><br>` : ''}
-              ${college['courses'] && college['courses'].length > 0 ? `<strong>Courses:</strong> ${college['courses'].slice(0, 3).join(', ')}${college['courses'].length > 3 ? '...' : ''}<br>` : ''}
-            </div>
-          </div>
-        `).join('');
-        
-        dataContainer.innerHTML = `
-          <h3>College Results (${result.count} found)</h3>
-          <div class="college-grid">${cardsHtml}</div>
-        `;
-      }
-    }
-    
-    function updateStats(result) {
-      const statsContainer = document.getElementById('stats');
-      const totalCount = document.getElementById('total-count');
-      const locationCount = document.getElementById('location-count');
-      
-      totalCount.textContent = result.count;
-      
-      // Count unique locations in current results
-      const uniqueLocations = new Set(result.data.map(college => college['location']).filter(Boolean));
-      locationCount.textContent = uniqueLocations.size;
-      
-      statsContainer.style.display = 'flex';
-    }
-    
-    function clearFilters() {
-      document.getElementById('search').value = '';
-      document.getElementById('location-filter').value = '';
-      document.getElementById('limit').value = '';
-      document.getElementById('sort-by').value = '';
-      document.getElementById('sort-order').value = 'asc';
-      
-      const dataContainer = document.getElementById('data-container');
-      const statsContainer = document.getElementById('stats');
-      dataContainer.innerHTML = '<p class="loading">Click "Search" to load data from the server...</p>';
-      statsContainer.style.display = 'none';
-    }
-    
-    function toggleView() {
-      viewMode = viewMode === 'cards' ? 'json' : 'cards';
-      if (currentData.length > 0) {
-        displayData({ data: currentData, count: currentData.length, success: true });
-      }
-    }
-  </script>
-</body>
-</html>
