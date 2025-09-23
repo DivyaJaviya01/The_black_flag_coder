@@ -15,36 +15,44 @@ import Privacy from "./views/Privacy";
 
 function AppContent() {
   const location = useLocation();
+  console.log('AppContent - Current location:', location.pathname);
+  
   const hideFooterRoutes = ['/signin', '/terms', '/privacy'];
   const shouldShowFooter = !hideFooterRoutes.includes(location.pathname);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       {/* Navbar at the top */}
       <Navbar />
 
-      {/* Main Routes */}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/talk-with-ai" element={<TalkWithAI />} />
-        <Route path="/ai-chat" element={<AIChat />} />
-        <Route path="/ai-assist" element={<Navigate to="/dashboard#chatbot" replace />} />
-        <Route path="/trending" element={<Trending />} />
-        <Route path="/roadmap" element={<Roadmap />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-      </Routes>
+      {/* Main Content - flex-grow to fill available space */}
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/talk-with-ai" element={<TalkWithAI />} />
+          <Route path="/ai-chat" element={<AIChat />} />
+          <Route path="/ai-assist" element={<Navigate to="/dashboard#chatbot" replace />} />
+          <Route path="/trending" element={<Trending />} />
+          <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          {/* Catch-all route for debugging */}
+          <Route path="*" element={<div>404 - Page not found: {location.pathname}</div>} />
+        </Routes>
+      </main>
 
       {/* Footer at the bottom - conditionally rendered */}
       {shouldShowFooter && <Footer />}
-    </>
+    </div>
   );
 }
 
 function App() {
+  console.log('App component initializing...');
+  
   return (
     <BrowserRouter>
       <AppContent />

@@ -14,7 +14,7 @@ const TalkWithAI = () => {
     const userData = localStorage.getItem('user');
     if (!userData) {
       // Redirect to sign-in page
-      navigate('/signin');
+      window.location.href = '/signin';
       return;
     }
     
@@ -58,9 +58,9 @@ const TalkWithAI = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 py-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Talk with AI</h1>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+        <div className="text-center mb-12 mt-16">
+          <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-4">Talk with AI</h1>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
             Get personalized career guidance, connect with our team, or find answers to common questions
           </p>
         </div>
@@ -90,8 +90,34 @@ const TalkWithAI = () => {
           </div>
         </div>
 
-        {/* Live Chat (Email) Section */}
+        {/* FAQ Section */}
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 mb-10">
+          <div className="flex items-start mb-6">
+            <div className="bg-emerald-500/20 p-3 rounded-lg mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Frequently Asked Questions</h2>
+              <p className="text-slate-300 mt-2">
+                Find answers to common questions about our AI career guidance platform.
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
+              <div key={index} className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
+                <h3 className="text-lg font-semibold text-white mb-2">{faq.question}</h3>
+                <p className="text-slate-300">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Live Chat (Email) Section */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
           <div className="flex items-start mb-6">
             <div className="bg-purple-500/20 p-3 rounded-lg mr-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +125,7 @@ const TalkWithAI = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Contact Our Team</h2>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Contact Our Team</h2>
               <p className="text-slate-300 mt-2">
                 Need personalized assistance? Send us a message and our career experts will get back to you shortly.
               </p>
@@ -150,32 +176,6 @@ const TalkWithAI = () => {
               </button>
             </form>
           )}
-        </div>
-
-        {/* FAQ Section */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
-          <div className="flex items-start mb-6">
-            <div className="bg-emerald-500/20 p-3 rounded-lg mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Frequently Asked Questions</h2>
-              <p className="text-slate-300 mt-2">
-                Find answers to common questions about our AI career guidance platform.
-              </p>
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="border-b border-white/10 pb-6 last:border-0 last:pb-0">
-                <h3 className="text-lg font-semibold text-white mb-2">{faq.question}</h3>
-                <p className="text-slate-300">{faq.answer}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

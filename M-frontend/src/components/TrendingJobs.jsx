@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const TrendingJobs = () => {
   const jobCategories = [
@@ -231,6 +231,29 @@ const TrendingJobs = () => {
     }
   ];
 
+  // Function to track job views
+  const trackJobView = (job) => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      // Get existing history
+      const history = JSON.parse(localStorage.getItem('userHistory') || '{"viewedStreams":[],"viewedJobs":[]}');
+      
+      // Add to viewed jobs (limit to 5)
+      const newViewedJobs = [
+        job,
+        ...history.viewedJobs.filter(item => item.id !== job.id).slice(0, 4)
+      ];
+      
+      // Update history
+      const updatedHistory = {
+        ...history,
+        viewedJobs: newViewedJobs
+      };
+      
+      localStorage.setItem('userHistory', JSON.stringify(updatedHistory));
+    }
+  };
+
   return (
     <section className="relative py-20 bg-gray-50">
       {/* Clean minimal background */}
@@ -332,7 +355,10 @@ const TrendingJobs = () => {
 
                     {/* CTA Button */}
                     <div className="mt-auto">
-                      <button className={`w-full bg-gradient-to-r ${job.color} hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.2),0_4px_12px_-4px_rgba(0,0,0,0.1)] text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 group/btn shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15)]`}>
+                      <button 
+                        className={`w-full bg-gradient-to-r ${job.color} hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.2),0_4px_12px_-4px_rgba(0,0,0,0.1)] text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 group/btn shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15)]`}
+                        onClick={() => trackJobView(job)}
+                      >
                         <span className="flex items-center justify-center space-x-2">
                           <span>View Position</span>
                           <svg className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -418,7 +444,10 @@ const TrendingJobs = () => {
 
                     {/* CTA Button */}
                     <div className="mt-auto">
-                      <button className={`w-full bg-gradient-to-r ${job.color} hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.2),0_4px_12px_-4px_rgba(0,0,0,0.1)] text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 group/btn shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15)]`}>
+                      <button 
+                        className={`w-full bg-gradient-to-r ${job.color} hover:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.2),0_4px_12px_-4px_rgba(0,0,0,0.1)] text-white py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105 group/btn shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15)]`}
+                        onClick={() => trackJobView(job)}
+                      >
                         <span className="flex items-center justify-center space-x-2">
                           <span>View Position</span>
                           <svg className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

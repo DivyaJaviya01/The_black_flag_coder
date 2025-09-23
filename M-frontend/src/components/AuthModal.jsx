@@ -73,6 +73,9 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
     // Store user data in localStorage
     localStorage.setItem('user', JSON.stringify(userData));
     
+    // Log successful authentication
+    console.log('AuthModal - User authenticated:', userData);
+    
     // Call success callback
     onAuthSuccess(userData);
     

@@ -9,14 +9,11 @@ import {
   ChevronLeftIcon 
 } from '@heroicons/react/24/outline';
 import AuthModal from './AuthModal';
-import Dashboard from '../views/Dashboard';
 
 const CareerAssessment = () => {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [user, setUser] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
@@ -60,22 +57,23 @@ const CareerAssessment = () => {
     // Check if user is authenticated
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      // Show dashboard with assessment results
-      setShowForm(false);
-      setShowDashboard(true);
+      // Save assessment data to localStorage
+      localStorage.setItem('assessmentData', JSON.stringify(formData));
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
     } else {
-      // Redirect to sign-in page
-      navigate('/signin');
+      // Redirect to sign-in page with redirect URL
+      window.location.href = '/signin?redirect=/dashboard';
     }
   };
 
   const handleAuthSuccess = (userData) => {
-    setUser(userData);
+    // This function is for the AuthModal, but we're redirecting instead of showing dashboard inline
+    // Save assessment data to localStorage
+    localStorage.setItem('assessmentData', JSON.stringify(formData));
     setShowAuthModal(false);
-    // Show dashboard after successful authentication
-    setShowDashboard(true);
+    // Redirect to dashboard after successful authentication
+    window.location.href = '/dashboard';
   };
 
   const subjectOptions = [
@@ -96,10 +94,6 @@ const CareerAssessment = () => {
     'Analytical Thinking', 'Teamwork', 'Time Management', 'Technical Skills',
     'Public Speaking', 'Writing', 'Mathematics', 'Research'
   ];
-
-  if (showDashboard && user) {
-    return <Dashboard user={user} assessmentData={formData} />;
-  }
 
   return (
     <div className="py-20 px-4 sm:px-6 lg:px-8 relative">
