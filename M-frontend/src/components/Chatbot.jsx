@@ -35,7 +35,12 @@ const Chatbot = ({ disableAutoScroll = false }) => {
       'trend', 'market', 'demand', 'opportunity', 'prospect',
       'internship', 'volunteer', 'portfolio', 'personal brand',
       'negotiation', 'benefits', 'workplace', 'culture', 'diversity',
-      'productivity', 'time management', 'communication', 'problem solving'
+      'productivity', 'time management', 'communication', 'problem solving',
+      // AI/ML related terms
+      'ai', 'ml', 'artificial intelligence', 'machine learning', 'data science',
+      'neural network', 'deep learning', 'algorithm', 'python', 'tensorflow',
+      'pytorch', 'nlp', 'computer vision', 'data analysis', 'big data',
+      'model training', 'predictive analytics', 'automation', 'robotics'
     ];
     
     // Define off-topic keywords that should be rejected
@@ -115,7 +120,7 @@ const Chatbot = ({ disableAutoScroll = false }) => {
     setConversation([
       {
         id: 1,
-        text: "Hello! I'm your AI Career Guidance Assistant. I can help you with career paths, job opportunities, skill development, education options, resume writing, interview preparation, and industry insights.\n\nWhat would you like to know about your career today?",
+        text: "Hello! I'm your AI Career Guidance Assistant. I can help you with career paths, job opportunities (including AI/ML careers), skill development, education options, resume writing, interview preparation, and industry insights.\n\nWhat would you like to know about your career today?",
         sender: 'ai',
         timestamp: new Date()
       }
@@ -180,7 +185,7 @@ const Chatbot = ({ disableAutoScroll = false }) => {
     // Check if the query is related to allowed topics
     if (!isAllowedTopic(message)) {
       const errorMsg = 'I specialize in career guidance and can help you with:\n' +
-        '• Career paths and job opportunities\n' +
+        '• Career paths and job opportunities (including AI/ML careers)\n' +
         '• Skill development and training\n' +
         '• Education options and courses\n' +
         '• Resume writing and interview preparation\n' +
@@ -215,7 +220,7 @@ const Chatbot = ({ disableAutoScroll = false }) => {
           contents: [{
             parts: [{
               text: `As an AI career guidance assistant, please provide a helpful and concise response to this career-related question: "${message}".\n\n` +
-                `Focus on topics like career paths, job opportunities, skill development, education options, resume writing, ` +
+                `Focus on topics like career paths (including AI/ML careers), job opportunities, skill development, education options, resume writing, ` +
                 `interview preparation, industry trends, professional growth, and workplace insights.\n` +
                 `If the question is not career-related, politely redirect the user to ask career-related questions.\n` +
                 `Keep your response professional, informative, and focused on career guidance.`
