@@ -509,7 +509,7 @@ const Chatbot = ({ disableAutoScroll = false }) => {
                 Cancel
               </button>
               <button
-                onClick={() => window.location.href = '/signin'}
+                onClick={() => window.location.href = '/signin?redirect=/ai-chat'}
                 className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-md hover:from-blue-700 hover:to-indigo-800 transition-all"
               >
                 Sign In

@@ -13,8 +13,8 @@ const TalkWithAI = () => {
     // Check if user is authenticated
     const userData = localStorage.getItem('user');
     if (!userData) {
-      // Redirect to sign-in page
-      window.location.href = '/signin';
+      // Redirect to sign-in page with redirect back to current page
+      window.location.href = '/signin?redirect=/talk-with-ai';
       return;
     }
     

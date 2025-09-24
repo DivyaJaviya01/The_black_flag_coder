@@ -76,11 +76,11 @@ const WhyChooseUs = () => {
         {/* Centered Heading */}
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why Choose 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> Mentoria</span>?
+            The Mentoria 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> Value Proposition</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover our comprehensive approach to career development through proven methodologies and expert guidance.
+            We provide the strategic framework to transform your aspirations into a clear and actionable career path.
           </p>
         </div>
 
