@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tesy Collection - Educational Institution Explorer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header h1 {
+      color: #2c3e50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.2em;
+    }
+    
+    .controls {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .stats {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    
+    .institution-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      min-height: 400px;
+    }
+    
+    .loading {
+      text-align: center;
+      color: #6c757d;
+      padding: 50px;
+      font-size: 1.2em;
+    }
+    
+    .error {
+      color: #dc3545;
+      background: #f8d7da;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #dc3545;
+    }
+    
+    .institution-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+    }
+    
+    .institution-name {
+      font-size: 2.2em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    
+    .institution-location {
+      font-size: 1.3em;
+      color: #7f8c8d;
+    }
+    
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 30px;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 25px;
+      border-left: 5px solid #667eea;
+    }
+    
+    .section-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .section-icon {
+      font-size: 1.2em;
+    }
+    
+    .overview-text {
+      color: #495057;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+      line-height: 1.7;
+    }
+    
+    .divisions-grid {
+      display: grid;
+      gap: 15px;
+    }
+    
+    .division {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #28a745;
+    }
+    
+    .division-name {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .division-fields {
+      color: #6c757d;
+      font-size: 0.95em;
+    }
+    
+    .fees-grid {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .fee-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #fd7e14;
+    }
+    
+    .fee-program {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    
+    .fee-cost {
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    .fee-duration {
+      color: #6c757d;
+      font-size: 0.9em;
+    }
+    
+    .placement-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .placement-stat {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .placement-value {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #28a745;
+    }
+    
+    .placement-label {
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    
+    .recruiters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .recruiter-tag {
+      background: #667eea;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    
+    .seats-grid {
+      display: grid;
+      gap: 12px;
+    }
+    
+    .seat-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #6f42c1;
+    }
+    
+    .seat-program {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    
+    .seat-count {
+      background: #6f42c1;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-weight: bold;
+    }
+    
+    .seat-note {
+      color: #6c757d;
+      font-size: 0.9em;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    .comparison-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    
+    .comparison-point {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-left: 3px solid #17a2b8;
+      background: #f8f9fa;
+    }
+    
+    .comparison-label {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .comparison-text {
+      color: #495057;
+    }
+    
+    .json-view {
+      background: #2d3748;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    @media (max-width: 768px) {
+      .sections-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .fee-item, .seat-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 Tesy Collection Explorer</h1>
+      <p class="subtitle">Educational Institution Data Reference</p>
+    </div>
+    
+    <div class="controls">
+      <button class="btn" onclick="loadInstitutionData()">📊 Load Institution Data</button>
+      <button class="btn" onclick="toggleView('formatted')">🎨 Formatted View</button>
+      <button class="btn" onclick="toggleView('json')">{ } JSON View</button>
+      <button class="btn" onclick="refreshData()">🔄 Refresh</button>
+    </div>
+    
+    <div class="stats" id="stats">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-records">0</div>
+          <div class="stat-label">Total Records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="total-fields">0</div>
+          <div class="stat-label">Data Fields</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">Tesy</div>
+          <div class="stat-label">Collection</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">VI</div>
+          <div class="stat-label">Database</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="institution-container" id="data-container">
+      <p class="loading">Click "Load Institution Data" to display the Tesy collection data...</p>
+    </div>
+  </div>
+
+  <script>
+    let currentData = null;
+    let viewMode = 'formatted';
+    
+    async function loadInstitutionData() {
+      const container = document.getElementById('data-container');
+      container.innerHTML = '<p class="loading">Loading institution data...</p>';
+      
+      try {
+        const response = await fetch('http://localhost:3001/api/collection/Tesy');
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+          currentData = result.data[0];
+          displayData();
+          updateStats(result);
+        } else {
+          throw new Error('No data found in Tesy collection');
+        }
+      } catch (error) {
+        container.innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+      }
+    }
+    
+    function displayData() {
+      const container = document.getElementById('data-container');
+      
+      if (!currentData) {
+        container.innerHTML = '<p class="loading">No data to display</p>';
+        return;
+      }
+      
+      if (viewMode === 'json') {
+        container.innerHTML = `
+          <h3>Raw JSON Data</h3>
+          <div class="json-view">${JSON.stringify(currentData, null, 2)}</div>
+        `;
+      } else {
+        displayFormattedView();
+      }
+    }
+    
+    function displayFormattedView() {
+      const container = document.getElementById('data-container');
+      const data = currentData;
+      
+      container.innerHTML = `
+        <div class="institution-header">
+          <div class="institution-name">${data.name}</div>
+          <div class="institution-location">${data.city}, ${data.state}, ${data.country}</div>
+        </div>
+        
+        <div class="sections-grid">
+          <!-- Specialization Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">🔬</span>
+              Specialization & Divisions
+            </div>
+            <div class="overview-text">${data.specialization.overview}</div>
+            <div class="divisions-grid">
+              ${data.specialization.divisions.map(div => `
+                <div class="division">
+                  <div class="division-name">${div.division}</div>
+                  <div class="division-fields">${div.fields.join(', ')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Recommendation Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">🏆</span>
+              Recommendations & Rankings
+            </div>
+            <div class="comparison-content">
+              <div class="comparison-point">
+                <div class="comparison-label">Ranking</div>
+                <div class="comparison-text">${data.recommendation.ranking}</div>
+              </div>
+              <div class="comparison-point">
+                <div class="comparison-label">Focus Recommendation</div>
+                <div class="comparison-text">${data.recommendation.focus}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Fees Structure Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">💰</span>
+              Fees Structure
+            </div>
+            <div class="fees-grid">
+              ${data.feesStructure.map(fee => `
+                <div class="fee-item">
+                  <div>
+                    <div class="fee-program">${fee.program}</div>
+                    <div class="fee-duration">${fee.duration}</div>
+                  </div>
+                  <div class="fee-cost">${fee.cost}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Placement Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">💼</span>
+              Placement Statistics
+            </div>
+            <div class="placement-stats">
+              <div class="placement-stat">
+                <div class="placement-value">${data.placement.highestSalary}</div>
+                <div class="placement-label">Highest Salary</div>
+              </div>
+              <div class="placement-stat">
+                <div class="placement-value">${data.placement.medianSalary.pgCourses}</div>
+                <div class="placement-label">PG Median</div>
+              </div>
+              <div class="placement-stat">
+                <div class="placement-value">${data.placement.medianSalary.ugCourses}</div>
+                <div class="placement-label">UG Median</div>
+              </div>
+            </div>
+            <h4 style="margin: 15px 0 10px 0; color: #2c3e50;">Top Recruiters:</h4>
+            <div class="recruiters">
+              ${data.placement.topRecruiters.map(recruiter => `
+                <span class="recruiter-tag">${recruiter}</span>
+              `).join('')}
+            </div>
+          </div>
+          
+          <!-- Comparison Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">⚖️</span>
+              Comparison with IITs
+            </div>
+            <div class="comparison-content">
+              <div class="comparison-point">
+                <div class="comparison-label">Focus</div>
+                <div class="comparison-text">${data.comparison.vsIITs.focus}</div>
+              </div>
+              <div class="comparison-point">
+                <div class="comparison-label">Reputation</div>
+                <div class="comparison-text">${data.comparison.vsIITs.reputation}</div>
+              </div>
+              <div class="comparison-point">
+                <div class="comparison-label">Placements</div>
+                <div class="comparison-text">${data.comparison.vsIITs.placements}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Seats Section -->
+          <div class="section">
+            <div class="section-title">
+              <span class="section-icon">🎯</span>
+              Available Seats
+            </div>
+            <div class="seats-grid">
+              ${data.seats.map(seat => `
+                <div class="seat-item">
+                  <div>
+                    <div class="seat-program">${seat.program}</div>
+                    ${seat.note ? `<div class="seat-note">${seat.note}</div>` : ''}
+                  </div>
+                  <div class="seat-count">${seat.count}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function updateStats(result) {
+      const statsContainer = document.getElementById('stats');
+      const totalRecords = document.getElementById('total-records');
+      const totalFields = document.getElementById('total-fields');
+      
+      totalRecords.textContent = result.count;
+      
+      if (currentData) {
+        const fieldCount = Object.keys(currentData).length;
+        totalFields.textContent = fieldCount;
+      }
+      
+      statsContainer.style.display = 'block';
+    }
+    
+    function toggleView(mode) {
+      viewMode = mode;
+      if (currentData) {
+        displayData();
+      }
+    }
+    
+    function refreshData() {
+      loadInstitutionData();
+    }
+    
+    // Auto-load data when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      loadInstitutionData();
+    });
+  </script>
+</body>
+</html>
