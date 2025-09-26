@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   HomeIcon,
@@ -20,6 +20,9 @@ function Navbar() {
   const [openMenu, setOpenMenu] = useState(null);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const homeMenuRef = useRef(null);
+  const roadmapMenuRef = useRef(null);
+  const aiMenuRef = useRef(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -67,6 +70,24 @@ function Navbar() {
     };
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openMenu === "home" && homeMenuRef.current && !homeMenuRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      } else if (openMenu === "roadmap" && roadmapMenuRef.current && !roadmapMenuRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      } else if (openMenu === "ai-assist" && aiMenuRef.current && !aiMenuRef.current.contains(event.target)) {
+        setOpenMenu(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenu]);
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('rememberedEmail');
@@ -95,7 +116,7 @@ function Navbar() {
 
           <div className="hidden md:flex items-center space-x-8 relative">
             {/* Home: label navigates, arrow toggles dropdown */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center" ref={homeMenuRef}>
               <button
                 onClick={() => {
                   // If on home page, scroll to top
@@ -169,7 +190,7 @@ function Navbar() {
             </div>
 
             {/* Roadmap: label navigates, arrow toggles dropdown */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center" ref={roadmapMenuRef}>
               <Link to="/roadmap" className="group flex items-center space-x-1 text-gray-200 hover:text-white transition-colors">
                 <MapIcon className="h-5 w-5" />
                 <span className="text-sm font-medium">Roadmap</span>
@@ -189,7 +210,11 @@ function Navbar() {
               {openMenu === "roadmap" && (
                 <div id="menu-roadmap" className="absolute top-10 left-1/2 -translate-x-1/2 w-64 bg-slate-950/95 backdrop-blur-xl border border-white/10 shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
                   <div className="py-2">
-                    <Link to="/roadmap" className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5">
+                    <Link 
+                      to="/career-fields"
+                      onClick={() => setOpenMenu(null)}
+                      className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5"
+                    >
                       <MapIcon className="h-5 w-5 mr-3 text-purple-400" />
                       <span className="text-sm">Career Fields</span>
                     </Link>
@@ -211,7 +236,7 @@ function Navbar() {
             </div>
 
             {/* Talk with AI: label navigates to page, arrow toggles dropdown */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center" ref={aiMenuRef}>
               <Link
                 to="/talk-with-ai"
                 className="group flex items-center space-x-1 text-gray-200 hover:text-white transition-colors"

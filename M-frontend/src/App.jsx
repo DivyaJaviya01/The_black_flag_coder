@@ -10,8 +10,10 @@ import TalkWithAI from "./views/TalkWithAI";
 import AIChat from "./views/AIChat";
 import Trending from "./views/Trending";
 import Roadmap from "./views/Roadmap";
+import Colleges from "./views/Colleges";
 import Terms from "./views/Terms";
 import Privacy from "./views/Privacy";
+import CareerFields from "./views/CareerFields";
 
 function AppContent() {
   const location = useLocation();
@@ -37,6 +39,8 @@ function AppContent() {
           <Route path="/ai-assist" element={<Navigate to="/dashboard#chatbot" replace />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/roadmap" element={<Roadmap />} />
+          <Route path="/colleges" element={<Colleges />} />
+          <Route path="/career-fields" element={<CareerFields />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           {/* Catch-all route for debugging */}

@@ -99,7 +99,10 @@ const TalkWithAI = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-white">
+                <span className="mr-1">Frequently</span>
+                <span className="ml-1">Asked Questions</span>
+              </h2>
               <p className="text-slate-300 mt-2">
                 Find answers to common questions about our AI career guidance platform.
               </p>

@@ -1,7 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRightIcon, GlobeAltIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 function Footer() {
+    const navigate = useNavigate();
+    
+    const handleTakeAssessment = () => {
+        // Navigate to the home page
+        navigate('/');
+        // Dispatch a custom event to open the assessment form after navigation
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('openAssessmentForm'));
+        }, 100);
+    };
+
     return (
         <footer className="relative overflow-hidden">
             {/* Same premium background as main website */}
@@ -25,7 +37,9 @@ function Footer() {
                         and explore the opportunities that await you.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <button className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden">
+                        <button 
+                            onClick={handleTakeAssessment}
+                            className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden">
                             <span className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                             <span className="relative flex items-center gap-3">
                                 Take the Assessment Now

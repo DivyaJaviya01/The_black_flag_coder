@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BuildingLibraryIcon, 
   AcademicCapIcon, 
@@ -15,6 +16,22 @@ import MotivationalQuotes from '../components/MotivationalQuotes';
 import HeroImage from '../assets/hero_image2.png';
 
 function Home() {
+  const navigate = useNavigate();
+  
+  const handleLaunchTrajectory = () => {
+    // Navigate to the home page and open the assessment form without scrolling
+    navigate('/');
+    // Dispatch a custom event to open the assessment form after navigation
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('openAssessmentForm'));
+    }, 100);
+  };
+  
+  const handleJoinCommunity = () => {
+    // Navigate to the AI chat page
+    navigate('/ai-chat');
+  };
+  
   return (
     <>
       <div className="overflow-hidden">
@@ -46,7 +63,7 @@ function Home() {
               {/* Left: Enhanced Copy Section */}
               <div className="lg:w-1/2 lg:pr-16 text-center lg:text-left">
                 {/* Premium badge */}
-                <div className="inline-flex items-center mb-8">
+                <div className="inline-flex items-center mb-8 mt-5">
                   <span className="relative inline-flex items-center text-sm font-bold tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300">
                     <span className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 blur-xl"></span>
                     <span className="relative px-6 py-2 bg-white/9 backdrop-blur-xl border border-white/20 rounded-full text-white">
@@ -58,7 +75,7 @@ function Home() {
                 {/* Main headline with gradient text */}
                 <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] mb-8">
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-cyan-200 drop-shadow-2xl">
-                    Beyond the Blueprint: <span className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 whitespace-nowrap">Architecting Your Future</span>
+                    Beyond the Blueprint : <span className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 whitespace-nowrap">Architecting Your Future</span>
                   </span>
                 </h1>
                 
@@ -70,16 +87,22 @@ function Home() {
 
                 {/* Enhanced CTA buttons - Made responsive to prevent overflow */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-                  <button className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                  <button 
+                    onClick={handleLaunchTrajectory}
+                    className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden whitespace-nowrap"
+                  >
                     <span className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                     <span className="relative flex items-center">
                       🚀 Launch Your Trajectory
                     </span>
                   </button>
                   
-                  <button className="group inline-flex items-center justify-center px-6 py-4 text-base font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 whitespace-nowrap">
+                  <button 
+                    onClick={handleJoinCommunity}
+                    className="group inline-flex items-center justify-center px-6 py-4 text-base font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                  >
                     <span className="flex items-center gap-2">
-                      💬 Join Community
+                      💬 AI Navigator
                       <svg className="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h8z" />
                       </svg>
