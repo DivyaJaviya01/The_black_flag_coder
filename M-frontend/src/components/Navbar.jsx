@@ -92,8 +92,8 @@ function Navbar() {
     localStorage.removeItem('user');
     localStorage.removeItem('rememberedEmail');
     setUser(null);
-    // Use window.location.href for a full page navigation to ensure all components update properly
-    window.location.href = '/';
+    // Use navigate for SPA navigation instead of full page reload
+    navigate('/');
   };
 
   const toggleMenu = (menu) => {
@@ -119,13 +119,8 @@ function Navbar() {
             <div className="relative flex items-center" ref={homeMenuRef}>
               <button
                 onClick={() => {
-                  // If on home page, scroll to top
-                  if (window.location.pathname === '/') {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  } else {
-                    // Navigate to home page
-                    window.location.href = '/';
-                  }
+                  // Navigate to home page using react-router
+                  navigate('/');
                   setOpenMenu(null);
                 }}
                 className="group flex items-center space-x-1 text-gray-200 hover:text-white transition-colors"
@@ -154,13 +149,15 @@ function Navbar() {
                     </Link>
                     <button 
                       onClick={() => {
-                        const trendingSection = document.getElementById('trending-section');
-                        if (trendingSection) {
-                          trendingSection.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                          // If not on home page, navigate to home and then scroll
-                          window.location.href = '/#trending-section';
-                        }
+                        // Navigate to home page first, then scroll to section
+                        navigate('/');
+                        // Use setTimeout to ensure navigation completes before scrolling
+                        setTimeout(() => {
+                          const trendingSection = document.getElementById('trending-section');
+                          if (trendingSection) {
+                            trendingSection.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }, 100);
                         setOpenMenu(null);
                       }}
                       className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5 w-full text-left"
@@ -170,13 +167,15 @@ function Navbar() {
                     </button>
                     <button 
                       onClick={() => {
-                        const assessmentSection = document.getElementById('assessment-section');
-                        if (assessmentSection) {
-                          assessmentSection.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                          // If not on home page, navigate to home and then scroll
-                          window.location.href = '/#assessment-section';
-                        }
+                        // Navigate to home page first, then scroll to section
+                        navigate('/');
+                        // Use setTimeout to ensure navigation completes before scrolling
+                        setTimeout(() => {
+                          const assessmentSection = document.getElementById('assessment-section');
+                          if (assessmentSection) {
+                            assessmentSection.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }, 100);
                         setOpenMenu(null);
                       }}
                       className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5 w-full text-left"
@@ -270,7 +269,18 @@ function Navbar() {
                     <Link 
                       to="/talk-with-ai#live-chat"
                       className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5"
-                      onClick={() => setOpenMenu(null)}
+                      onClick={() => {
+                        // If already on the page, scroll to section
+                        if (window.location.pathname === '/talk-with-ai') {
+                          setTimeout(() => {
+                            const liveChatSection = document.getElementById('live-chat');
+                            if (liveChatSection) {
+                              liveChatSection.scrollIntoView({ behavior: 'smooth' });
+                            }
+                          }, 100);
+                        }
+                        setOpenMenu(null);
+                      }}
                     >
                       <CpuChipIcon className="h-5 w-5 mr-3 text-purple-400" />
                       <span className="text-sm">Live Chat</span>
@@ -278,7 +288,18 @@ function Navbar() {
                     <Link 
                       to="/talk-with-ai#faq"
                       className="flex items-center px-4 py-2 text-gray-200 hover:bg-white/5"
-                      onClick={() => setOpenMenu(null)}
+                      onClick={() => {
+                        // If already on the page, scroll to section
+                        if (window.location.pathname === '/talk-with-ai') {
+                          setTimeout(() => {
+                            const faqSection = document.getElementById('faq');
+                            if (faqSection) {
+                              faqSection.scrollIntoView({ behavior: 'smooth' });
+                            }
+                          }, 100);
+                        }
+                        setOpenMenu(null);
+                      }}
                     >
                       <QuestionMarkCircleIcon className="h-5 w-5 mr-3 text-emerald-400" />
                       <span className="text-sm">FAQ</span>

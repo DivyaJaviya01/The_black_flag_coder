@@ -32,6 +32,11 @@ const Roadmap = () => {
     vocational: false
   });
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Track viewed streams
   useEffect(() => {
     // This will run when the component mounts

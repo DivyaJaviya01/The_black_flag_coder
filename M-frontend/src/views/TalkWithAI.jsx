@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const TalkWithAI = () => {
@@ -7,6 +7,11 @@ const TalkWithAI = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     
@@ -14,7 +19,7 @@ const TalkWithAI = () => {
     const userData = localStorage.getItem('user');
     if (!userData) {
       // Redirect to sign-in page with redirect back to current page
-      window.location.href = '/signin?redirect=/talk-with-ai';
+      navigate('/signin?redirect=/talk-with-ai');
       return;
     }
     
