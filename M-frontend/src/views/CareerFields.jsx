@@ -101,10 +101,10 @@ const CareerFields = () => {
           <div className="text-center">
             <div className="text-center mt-10">
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">Career Fields</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">Your Future, Your Choice</span>
               </h1>
               <p className="text-xl text-slate-300 max-w-2xl leading-relaxed mx-auto mb-8">
-                Explore various career paths available in the Science stream after 12th grade
+                Browse through diverse fields and uncover specific roles, growth prospects, and skills required to build a successful future.
               </p>
             </div>
           </div>
@@ -125,7 +125,7 @@ const CareerFields = () => {
             </div>
             <h2 className="text-3xl font-bold text-center text-white">Science Career Fields</h2>
           </div>
-          <p className="text-slate-200 text-center mb-10 max-w-3xl mx-auto">Explore various career paths available in the Science stream after 12th grade</p>
+          <p className="text-slate-200 text-center mb-10 max-w-3xl mx-auto">Browse through diverse fields and uncover specific roles, growth prospects, and skills required to build a successful future.</p>
           
           {/* PCM Section */}
           <div className="mb-10">
