@@ -23,17 +23,56 @@ function Navbar() {
 
   useEffect(() => {
     // Check if user is authenticated
+    console.log('Navbar - Checking user authentication status...');
     const userData = localStorage.getItem('user');
+    console.log('Navbar - User data from localStorage:', userData);
+    
     if (userData) {
-      setUser(JSON.parse(userData));
+      try {
+        const parsedUser = JSON.parse(userData);
+        console.log('Navbar - Parsed user data:', parsedUser);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Navbar - Error parsing user data:', error);
+        // If there's an error parsing, remove the invalid data
+        localStorage.removeItem('user');
+      }
+    } else {
+      console.log('Navbar - No user data found');
     }
+    
+    // Add event listener for storage changes to detect login/logout from other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === 'user') {
+        console.log('Navbar - User data changed in storage:', e.newValue);
+        if (e.newValue) {
+          try {
+            const parsedUser = JSON.parse(e.newValue);
+            setUser(parsedUser);
+          } catch (error) {
+            console.error('Navbar - Error parsing user data from storage event:', error);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('rememberedEmail');
     setUser(null);
-    navigate('/');
+    // Use window.location.href for a full page navigation to ensure all components update properly
+    window.location.href = '/';
   };
 
   const toggleMenu = (menu) => {

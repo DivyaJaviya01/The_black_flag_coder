@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Chatbot from '../components/Chatbot';
 import { 
   ChartBarIcon, 
   AcademicCapIcon,
@@ -10,7 +9,13 @@ import {
   ArrowRightIcon,
   BookOpenIcon,
   BriefcaseIcon,
-  ArrowLeftOnRectangleIcon
+  ArrowLeftOnRectangleIcon,
+  Cog6ToothIcon,
+  BellIcon,
+  CalendarIcon,
+  ClockIcon,
+  EyeIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 const Dashboard = () => {
@@ -19,6 +24,8 @@ const Dashboard = () => {
   const chatbotRef = useRef(null);
   const [user, setUser] = useState(null);
   const [assessmentData, setAssessmentData] = useState(null);
+  const [userHistory, setUserHistory] = useState({ viewedStreams: [], viewedJobs: [] });
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check for hash fragment and scroll to chatbot section
   useEffect(() => {
@@ -29,48 +36,128 @@ const Dashboard = () => {
 
   // Check if user is authenticated
   useEffect(() => {
+    console.log('Dashboard - Checking authentication status...');
     const userData = localStorage.getItem('user');
+    console.log('Dashboard - User data from localStorage:', userData);
+    
     if (!userData) {
-      navigate('/signin');
+      console.log('Dashboard - No user data found, redirecting to sign in');
+      // Use window.location.href for a full page navigation to ensure all components update
+      window.location.href = '/signin';
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
+    try {
+      const parsedUser = JSON.parse(userData);
+      console.log('Dashboard - Parsed user data:', parsedUser);
+      setUser(parsedUser);
 
-    // Get or create default assessment data
-    const savedAssessment = localStorage.getItem('assessmentData');
-    if (savedAssessment) {
-      setAssessmentData(JSON.parse(savedAssessment));
-    } else {
-      // Default assessment data for demonstration
-      const defaultAssessment = {
-        currentClass: '12th Grade',
-        subjects: ['Mathematics', 'Physics', 'Chemistry', 'Computer Science', 'English'],
-        interests: ['Technology & Programming', 'Problem Solving', 'Innovation', 'Science & Research', 'Digital Design'],
-        skills: ['Analytical Thinking', 'Programming', 'Problem Solving', 'Communication', 'Creativity']
-      };
-      setAssessmentData(defaultAssessment);
-      localStorage.setItem('assessmentData', JSON.stringify(defaultAssessment));
+      // Get or create default assessment data
+      const savedAssessment = localStorage.getItem('assessmentData');
+      if (savedAssessment) {
+        setAssessmentData(JSON.parse(savedAssessment));
+      } else {
+        // Default assessment data for demonstration
+        const defaultAssessment = {
+          currentClass: '12th Grade',
+          subjects: ['Mathematics', 'Physics', 'Chemistry', 'Computer Science', 'English'],
+          interests: ['Technology & Programming', 'Problem Solving', 'Innovation', 'Science & Research', 'Digital Design'],
+          skills: ['Analytical Thinking', 'Programming', 'Problem Solving', 'Communication', 'Creativity']
+        };
+        setAssessmentData(defaultAssessment);
+        localStorage.setItem('assessmentData', JSON.stringify(defaultAssessment));
+      }
+
+      // Get user history
+      const savedHistory = localStorage.getItem('userHistory');
+      if (savedHistory) {
+        setUserHistory(JSON.parse(savedHistory));
+      } else {
+        // Sample history data for demonstration
+        const sampleHistory = {
+          viewedStreams: [
+            { name: 'Science (PCM)', match: '95%', description: 'Perfect for Engineering and Technology careers', timestamp: new Date(Date.now() - 86400000).toISOString() },
+            { name: 'Commerce', match: '88%', description: 'Great for Business and Finance careers', timestamp: new Date(Date.now() - 172800000).toISOString() }
+          ],
+          viewedJobs: [
+            { id: 1, title: 'Data Scientist', category: 'Science', timestamp: new Date(Date.now() - 86400000).toISOString() },
+            { id: 11, title: 'UX/UI Designer', category: 'Arts', timestamp: new Date(Date.now() - 259200000).toISOString() },
+            { id: 6, title: 'Financial Analyst', category: 'Commerce', timestamp: new Date(Date.now() - 432000000).toISOString() }
+          ]
+        };
+        setUserHistory(sampleHistory);
+        localStorage.setItem('userHistory', JSON.stringify(sampleHistory));
+      }
+      
+      console.log('Dashboard - Authentication check completed successfully');
+    } catch (error) {
+      console.error('Dashboard - Error parsing user data:', error);
+      // If there's an error parsing, remove the invalid data and redirect to sign in
+      localStorage.removeItem('user');
+      // Use window.location.href for a full page navigation to ensure all components update
+      window.location.href = '/signin';
     }
+    
+    // Add event listener for storage changes to detect logout from other tabs
+    const handleStorageChange = (e) => {
+      if (e.key === 'user' && !e.newValue) {
+        console.log('Dashboard - User logged out in another tab, redirecting to sign in');
+        // Use window.location.href for a full page navigation to ensure all components update
+        window.location.href = '/signin';
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [navigate]);
+
+  // Set loading to false after authentication check
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('rememberedEmail');
-    navigate('/signin');
+    // Use window.location.href for a full page navigation to ensure all components update
+    window.location.href = '/signin';
   };
 
-  if (!user || !assessmentData) {
+  // Function to clear user history
+  const clearHistory = () => {
+    const clearedHistory = { viewedStreams: [], viewedJobs: [] };
+    setUserHistory(clearedHistory);
+    localStorage.setItem('userHistory', JSON.stringify(clearedHistory));
+  };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center">
         <div className="text-white text-center">
-          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading your dashboard...</p>
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm text-slate-300">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
+
+  // Show loading state if user or assessment data is not ready
+  if (!user || !assessmentData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sm text-slate-300">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Generate recommendations based on assessment data
   const generateRecommendations = () => {
     const { subjects, interests, skills, currentClass } = assessmentData;
@@ -127,150 +214,256 @@ const Dashboard = () => {
 
   const recommendations = generateRecommendations();
 
+  // Function to add to history
+  const addToHistory = (type, item) => {
+    const newHistory = { ...userHistory };
+    const timestamp = new Date().toISOString();
+    
+    if (type === 'stream') {
+      newHistory.viewedStreams = [
+        { ...item, timestamp },
+        ...newHistory.viewedStreams.slice(0, 4) // Keep only last 5
+      ];
+    } else if (type === 'job') {
+      newHistory.viewedJobs = [
+        { ...item, timestamp },
+        ...newHistory.viewedJobs.slice(0, 4) // Keep only last 5
+      ];
+    }
+    
+    setUserHistory(newHistory);
+    localStorage.setItem('userHistory', JSON.stringify(newHistory));
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900">
-      <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-8">
-        <div className="lg:w-2/3 w-full">
-          {/* Background Effects */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(59,130,246,0.15),transparent_70%)] opacity-80"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.15),transparent_70%)] opacity-60"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 pt-16">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Career Dashboard</h1>
+          <p className="text-slate-400">Welcome back, {user.name}. Here's your personalized career guidance overview.</p>
+        </div>
+
+        {/* Line after heading */}
+        <div className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent mb-8"></div>
+
+        {/* Assessment-Based Recommendations Section */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Your Career Insights</h2>
           
-          <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <div className="flex items-center justify-center mb-6">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full" />
-                  ) : (
-                    <UserCircleIcon className="w-12 h-12 text-white" />
-                  )}
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Best Skills */}
+            <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700/50">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-yellow-500/20 rounded-lg mr-3">
+                  <TrophyIcon className="w-5 h-5 text-yellow-400" />
                 </div>
+                <h3 className="text-lg font-semibold text-white">Top Skills</h3>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-cyan-200 mb-4">
-                Welcome, {user.name}!
-              </h1>
-              <p className="text-xl text-slate-200 max-w-2xl mx-auto mb-6">
-                Your personalized career assessment results are ready. Here are our recommendations based on your responses.
-              </p>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg transition-all duration-200"
-              >
-                <ArrowLeftOnRectangleIcon className="h-5 w-5" />
-                <span>Logout</span>
-              </button>
+              <ul className="space-y-2">
+                {assessmentData.skills.slice(0, 3).map((skill, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    <span className="text-slate-300">{skill}</span>
+                    <span className="text-xs font-medium bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded">
+                      {100 - (index * 10)}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Assessment Summary */}
-            <div className="grid md:grid-cols-3 gap-6 mb-12">
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 text-center">
-                <ChartBarIcon className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Assessment Score</h3>
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">
-                  92%
+            {/* Recommended Stream */}
+            <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700/50">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-blue-500/20 rounded-lg mr-3">
+                  <AcademicCapIcon className="w-5 h-5 text-blue-400" />
                 </div>
-                <p className="text-slate-300 text-sm">Compatibility Match</p>
+                <h3 className="text-lg font-semibold text-white">Recommended Stream</h3>
               </div>
-
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 text-center">
-                <AcademicCapIcon className="w-12 h-12 text-green-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Current Class</h3>
-                <div className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-300 to-emerald-300">
-                  {assessmentData.currentClass}
-                </div>
-                <p className="text-slate-300 text-sm">Grade Level</p>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 text-center">
-                <TrophyIcon className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Top Skills</h3>
-                <div className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
-                  {assessmentData.skills.slice(0, 2).join(', ')}
-                </div>
-                <p className="text-slate-300 text-sm">Identified Strengths</p>
+              <div className="text-center py-2">
+                <p className="text-xl font-bold text-white mb-1">
+                  {recommendations.streams.length > 0 ? recommendations.streams[0].name : 'Science (PCM)'}
+                </p>
+                <p className="text-sm text-slate-400">
+                  {recommendations.streams.length > 0 ? recommendations.streams[0].match : '95%'} match
+                </p>
+                <button 
+                  className="mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                  onClick={() => recommendations.streams.length > 0 && addToHistory('stream', recommendations.streams[0])}
+                >
+                  Explore Path
+                </button>
               </div>
             </div>
 
-            {/* Recommended Streams */}
-            <div className="mb-12">
-              <div className="flex items-center mb-8">
-                <BookOpenIcon className="w-8 h-8 text-blue-400 mr-3" />
-                <h2 className="text-3xl font-bold text-white">Recommended Academic Streams</h2>
+            {/* Recommended Field */}
+            <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700/50">
+              <div className="flex items-center mb-4">
+                <div className="p-2 bg-purple-500/20 rounded-lg mr-3">
+                  <LightBulbIcon className="w-5 h-5 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Suggested Field</h3>
+              </div>
+              <div className="text-center py-2">
+                <p className="text-xl font-bold text-white mb-1">
+                  {recommendations.degrees.length > 0 ? recommendations.degrees[0].name : 'Computer Science'}
+                </p>
+                <p className="text-sm text-slate-400">
+                  {recommendations.degrees.length > 0 ? recommendations.degrees[0].match : '94%'} match
+                </p>
+                <button 
+                  className="mt-3 text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+                  onClick={() => recommendations.degrees.length > 0 && addToHistory('job', {
+                    id: Date.now(),
+                    title: recommendations.degrees[0].name,
+                    category: recommendations.streams.length > 0 ? recommendations.streams[0].name : 'Science',
+                    timestamp: new Date().toISOString()
+                  })}
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm">Assessment Match</p>
+                <h3 className="text-2xl font-bold text-white">94%</h3>
+              </div>
+              <div className="p-3 bg-blue-500/20 rounded-lg">
+                <ChartBarIcon className="w-6 h-6 text-blue-400" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="w-full bg-slate-700 rounded-full h-2">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style={{width: '94%'}}></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm">Current Education</p>
+                <h3 className="text-2xl font-bold text-white">{assessmentData.currentClass}</h3>
+              </div>
+              <div className="p-3 bg-green-500/20 rounded-lg">
+                <AcademicCapIcon className="w-6 h-6 text-green-400" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="text-slate-400 text-sm">Preparing for future</p>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm">Key Strengths</p>
+                <h3 className="text-2xl font-bold text-white">{assessmentData.skills.length}</h3>
+              </div>
+              <div className="p-3 bg-yellow-500/20 rounded-lg">
+                <TrophyIcon className="w-6 h-6 text-yellow-400" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="text-slate-400 text-sm truncate">{assessmentData.skills[0]}</p>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-slate-400 text-sm">Top Interest</p>
+                <h3 className="text-2xl font-bold text-white">{assessmentData.interests.length}</h3>
+              </div>
+              <div className="p-3 bg-purple-500/20 rounded-lg">
+                <LightBulbIcon className="w-6 h-6 text-purple-400" />
+              </div>
+            </div>
+            <div className="mt-4">
+              <p className="text-slate-400 text-sm truncate">{assessmentData.interests[0]}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="lg:w-2/3 w-full">
+            {/* Recommendations Section */}
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Personalized Recommendations</h2>
+                <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">
+                  View All
+                </button>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 {recommendations.streams.map((stream, index) => (
-                  <div key={index} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 hover:bg-white/15 transition-all duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-semibold text-white">{stream.name}</h3>
-                      <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm font-bold rounded-full">
+                  <div key={index} className="bg-slate-800/50 rounded-xl p-5 border border-slate-700/50 hover:border-blue-500/50 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-lg font-semibold text-white">{stream.name}</h3>
+                      <span className="px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full">
                         {stream.match}
                       </span>
                     </div>
-                    <p className="text-slate-300 mb-4">{stream.description}</p>
-                    <button className="flex items-center text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                      Learn More <ArrowRightIcon className="w-4 h-4 ml-2" />
+                    <p className="text-slate-400 text-sm mb-4">{stream.description}</p>
+                    <button 
+                      className="flex items-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                      onClick={() => addToHistory('stream', stream)}
+                    >
+                      Explore Path <ArrowRightIcon className="w-4 h-4 ml-1" />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Recommended Degrees */}
-            <div className="mb-12">
-              <div className="flex items-center mb-8">
-                <BriefcaseIcon className="w-8 h-8 text-purple-400 mr-3" />
-                <h2 className="text-3xl font-bold text-white">Recommended Degree Programs</h2>
-              </div>
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                {recommendations.degrees.map((degree, index) => (
-                  <div key={index} className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 hover:bg-white/15 transition-all duration-300">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-lg font-semibold text-white">{degree.name}</h3>
-                        <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-bold rounded-full">
-                          {degree.match}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-300">Duration: {degree.duration}</span>
-                        <button className="flex items-center text-purple-400 hover:text-purple-300 font-medium transition-colors">
-                          Explore <ArrowRightIcon className="w-4 h-4 ml-2" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
             {/* Interest Analysis */}
-            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-8">
-              <div className="flex items-center mb-6">
-                <LightBulbIcon className="w-8 h-8 text-yellow-400 mr-3" />
-                <h2 className="text-2xl font-bold text-white">Your Interest Profile</h2>
-              </div>
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+              <h2 className="text-2xl font-bold text-white mb-6">Profile Insights</h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Top Interests</h3>
-                  <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <LightBulbIcon className="w-5 h-5 text-yellow-400 mr-2" />
+                    Your Interests
+                  </h3>
+                  <div className="space-y-3">
                     {assessmentData.interests.slice(0, 5).map((interest, index) => (
-                      <div key={index} className="flex items-center">
-                        <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mr-3"></div>
+                      <div key={index} className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
                         <span className="text-slate-300">{interest}</span>
+                        <span className="text-xs font-medium bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                          {Math.max(70 - (index * 8), 40)}%
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Favorite Subjects</h3>
-                  <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <AcademicCapIcon className="w-5 h-5 text-green-400 mr-2" />
+                    Favorite Subjects
+                  </h3>
+                  <div className="space-y-3">
                     {assessmentData.subjects.slice(0, 5).map((subject, index) => (
-                      <div key={index} className="flex items-center">
-                        <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full mr-3"></div>
+                      <div key={index} className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
                         <span className="text-slate-300">{subject}</span>
+                        <span className="text-xs font-medium bg-green-500/20 text-green-400 px-2 py-1 rounded">
+                          {Math.max(85 - (index * 7), 50)}%
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -278,11 +471,136 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </div>
-        <div className="lg:w-1/3 w-full">
-          <Chatbot />
+          
+          <div className="lg:w-1/3 w-full">
+            {/* Recently Viewed Streams */}
+            {userHistory.viewedStreams.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white flex items-center">
+                    <EyeIcon className="w-5 h-5 text-blue-400 mr-2" />
+                    Recently Viewed Streams
+                  </h2>
+                  <button 
+                    onClick={clearHistory}
+                    className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                    title="Clear History"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {userHistory.viewedStreams.map((stream, index) => (
+                    <div key={index} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-white">{stream.name}</h3>
+                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                          {formatDate(stream.timestamp)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium bg-green-500/20 text-green-400 px-2 py-1 rounded">
+                          {stream.match} match
+                        </span>
+                        <button 
+                          className="text-xs text-blue-400 hover:text-blue-300"
+                          onClick={() => addToHistory('stream', stream)}
+                        >
+                          View Again
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recently Viewed Jobs */}
+            {userHistory.viewedJobs.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white flex items-center">
+                    <BriefcaseIcon className="w-5 h-5 text-purple-400 mr-2" />
+                    Recently Viewed Careers
+                  </h2>
+                  <button 
+                    onClick={clearHistory}
+                    className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+                    title="Clear History"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {userHistory.viewedJobs.map((job, index) => (
+                    <div key={index} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-white text-sm">{job.title}</h3>
+                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
+                          {formatDate(job.timestamp)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-400">{job.category}</span>
+                        <button 
+                          className="text-xs text-purple-400 hover:text-purple-300"
+                          onClick={() => addToHistory('job', job)}
+                        >
+                          View Again
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 p-6">
+              <h2 className="text-xl font-bold text-white mb-6">Quick Navigation</h2>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  className="bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-4 border border-slate-700/50 hover:border-blue-500/50 transition-colors text-center"
+                  onClick={() => window.location.href = '/roadmap'}
+                >
+                  <BookOpenIcon className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                  <span className="text-sm text-white">Explore Streams</span>
+                </button>
+                
+                <button 
+                  className="bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-4 border border-slate-700/50 hover:border-purple-500/50 transition-colors text-center"
+                  onClick={() => window.location.href = '/trending'}
+                >
+                  <BriefcaseIcon className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                  <span className="text-sm text-white">Trending Jobs</span>
+                </button>
+                
+                <button 
+                  className="bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-4 border border-slate-700/50 hover:border-green-500/50 transition-colors text-center"
+                  onClick={() => window.location.href = '/ai-chat'}
+                >
+                  <ChartBarIcon className="w-6 h-6 text-green-400 mx-auto mb-2" />
+                  <span className="text-sm text-white">AI Chat</span>
+                </button>
+                
+                <button 
+                  className="bg-slate-800/50 hover:bg-slate-700/50 rounded-lg p-4 border border-slate-700/50 hover:border-yellow-500/50 transition-colors text-center"
+                  onClick={() => window.location.href = '/assessment'}
+                >
+                  <LightBulbIcon className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                  <span className="text-sm text-white">Retake Assessment</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      
+      {/* 2px gradient line between dashboard and footer */}
+      <div className="h-px bg-gradient-to-r from-transparent via-white/40 to-transparent mx-24"></div>
     </div>
   );
 };

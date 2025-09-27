@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   EyeIcon,
   EyeSlashIcon,
@@ -16,6 +16,7 @@ const SignIn = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -101,8 +102,14 @@ const SignIn = () => {
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.email}`
       };
 
-      // Store user data
+      console.log('SignIn - User data to be stored:', userData);
+      
+      // Store user data immediately
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Verify that the data was stored correctly
+      const storedUserData = localStorage.getItem('user');
+      console.log('SignIn - User data stored in localStorage:', storedUserData);
       
       // Handle remember me
       if (formData.rememberMe) {
@@ -113,12 +120,35 @@ const SignIn = () => {
 
       setSuccessMessage(isLogin ? 'Welcome back!' : 'Account created successfully!');
       
-      // Redirect to dashboard after short delay
+      // Immediate redirect for better user experience
+      // Add a small delay only for UX purposes to show the success message
       setTimeout(() => {
-        navigate('/dashboard');
-      }, 1000);
+        try {
+          // Force a refresh of the authentication status
+          window.dispatchEvent(new Event('storage'));
+          
+          const redirectUrl = searchParams.get('redirect');
+          console.log('SignIn - Redirect URL from params:', redirectUrl);
+          
+          if (redirectUrl) {
+            const decodedUrl = decodeURIComponent(redirectUrl);
+            console.log('SignIn - Decoded redirect URL:', decodedUrl);
+            // Use window.location.href for a full page navigation to ensure all components update
+            window.location.href = decodedUrl;
+          } else {
+            console.log('SignIn - No redirect URL, going to dashboard');
+            // Use window.location.href for a full page navigation to ensure all components update
+            window.location.href = '/dashboard';
+          }
+        } catch (error) {
+          console.error('SignIn - Error during navigation:', error);
+          // Fallback navigation
+          window.location.href = '/dashboard';
+        }
+      }, 500); // Slightly longer delay to ensure success message is visible
 
     } catch (error) {
+      console.error('Sign in error:', error);
       setErrors({ submit: 'Something went wrong. Please try again.' });
     } finally {
       setIsLoading(false);

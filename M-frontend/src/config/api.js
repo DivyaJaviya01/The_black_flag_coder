@@ -1,7 +1,7 @@
 // API configuration
 export const API_CONFIG = {
   // Google AI API key
-  GOOGLE_AI_KEY: 'AIzaSyBChiBPQndRVBR38gFRWlLMWKAxoJmSdGk',
+  GOOGLE_AI_KEY: 'AIzaSyAE3W1w8Ae8WAXRZcctwI68sVKVaMuiIUo',
   
   // Allowed topics related to the website's purpose
   ALLOWED_TOPICS: [

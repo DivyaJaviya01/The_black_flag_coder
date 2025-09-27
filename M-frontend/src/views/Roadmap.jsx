@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BeakerIcon,
   CurrencyDollarIcon,
@@ -15,6 +15,12 @@ const Roadmap = () => {
     arts: false,
     vocational: false
   });
+
+  // Track viewed streams
+  useEffect(() => {
+    // This will run when the component mounts
+    // We could add more sophisticated tracking here if needed
+  }, []);
 
   // Define all fields for each stream
   const streamData = {
@@ -121,6 +127,34 @@ const Roadmap = () => {
       ...prev,
       [stream]: !prev[stream]
     }));
+    
+    // Add to user history when expanding a stream
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      const streamInfo = {
+        name: streamData[stream].title,
+        match: "85%", // This would be dynamic in a real implementation
+        description: `Details for ${streamData[stream].title}`
+      };
+      
+      // Get existing history
+      const history = JSON.parse(localStorage.getItem('userHistory') || '{"viewedStreams":[],"viewedJobs":[]}');
+      
+      // Add to viewed streams (limit to 5)
+      const newViewedStreams = [
+        streamInfo,
+        ...history.viewedStreams.filter(item => item.name !== streamInfo.name).slice(0, 4)
+      ];
+      
+      // Update history
+      const updatedHistory = {
+        ...history,
+        viewedStreams: newViewedStreams
+      };
+      
+      localStorage.setItem('userHistory', JSON.stringify(updatedHistory));
+    }
   };
 
   const getTrendColor = (trend) => {
