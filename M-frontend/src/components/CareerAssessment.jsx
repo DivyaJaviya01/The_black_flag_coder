@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   AcademicCapIcon, 
@@ -13,6 +13,18 @@ import AuthModal from './AuthModal';
 const CareerAssessment = () => {
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    const handleOpenForm = () => {
+      setShowForm(true);
+    };
+
+    window.addEventListener('openAssessmentForm', handleOpenForm);
+    
+    return () => {
+      window.removeEventListener('openAssessmentForm', handleOpenForm);
+    };
+  }, []);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -105,13 +117,12 @@ const CareerAssessment = () => {
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-cyan-200 mb-6 drop-shadow-2xl">
-            Career Assessment
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <span className="mr-1">Professional</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 ml-4">Compass</span>
           </h2>
           <p className="text-xl text-slate-200 max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
-            Discover your perfect career path with our comprehensive assessment designed specifically 
-            for 10th and 12th grade students. Get personalized recommendations for streams and degrees 
-            based on your interests, skills, and aspirations.
+            Chart your future with a tailored career assessment designed for students in classes 10 and 12. Uncover a personalized blueprint of streams and degrees that perfectly aligns with your skills, interests, and ambitions.
           </p>
         </div>
 
@@ -121,7 +132,7 @@ const CareerAssessment = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <AcademicCapIcon className="w-8 h-8 text-white drop-shadow-lg" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-4 drop-shadow-lg">Personalized Analysis</h3>
+            <h3 className="text-xl font-semibold text-white mb-4 drop-shadow-lg">Customized Evaluation</h3>
             <p className="text-slate-200 drop-shadow-md">
               Get detailed insights into your strengths, interests, and potential career paths 
               tailored specifically to your grade level and academic goals.
@@ -143,7 +154,7 @@ const CareerAssessment = () => {
             <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <ChartBarIcon className="w-8 h-8 text-white drop-shadow-lg" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-4 drop-shadow-lg">Degree Recommendations</h3>
+            <h3 className="text-xl font-semibold text-white mb-4 drop-shadow-lg">Personalized Degree Pairing</h3>
             <p className="text-slate-200 drop-shadow-md">
               Discover the most suitable degree programs and career paths based on your assessment 
               results and future market trends.
@@ -157,7 +168,7 @@ const CareerAssessment = () => {
             onClick={() => setShowForm(true)}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-12 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >
-            Start Assessment
+            Launch Assessment
           </button>
         </div>
       </div>

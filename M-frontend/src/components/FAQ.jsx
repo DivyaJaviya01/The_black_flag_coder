@@ -53,7 +53,7 @@ const FAQ = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Frequently Asked 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300">Questions</span>
+            <span className="text-transparent ml-4 bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300">Questions</span>
           </h2>
           <p className="text-xl text-slate-300/90 max-w-3xl mx-auto">
             Get answers to common questions about our AI-powered career guidance platform

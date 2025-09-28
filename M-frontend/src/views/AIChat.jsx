@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Chatbot from '../components/Chatbot';
 
 const AIChat = () => {
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 overflow-hidden">
       {/* Header */}
@@ -23,7 +28,7 @@ const AIChat = () => {
       {/* Main Content - Using flex-grow to fill available space */}
       <div className="flex-grow flex flex-col overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 py-6 flex-grow flex flex-col w-full overflow-hidden">
-          {/* Title and Description */}
+          {/* Title and Description - Simplified as per user preference */}
           <div className="text-center mb-6 flex-shrink-0">
             <h2 className="text-3xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
               Career Guidance Assistant
@@ -34,7 +39,7 @@ const AIChat = () => {
             </p>
           </div>
 
-          {/* Chat Container - Increased width with max-w-6xl */}
+          {/* Chat Container - Streamlined interface as per user preference */}
           <div className="bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden flex-grow flex flex-col mx-auto w-full max-w-6xl">
             <Chatbot disableAutoScroll={false} />
           </div>

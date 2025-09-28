@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   BuildingLibraryIcon, 
   AcademicCapIcon, 
@@ -11,29 +12,50 @@ import FAQ from '../components/FAQ';
 import TrendingJobs from '../components/TrendingJobs';
 import CareerAssessment from '../components/CareerAssessment';
 import MotivationalQuotes from '../components/MotivationalQuotes';
-import HeroImage from '../assets/Hero-section.jpg'; // Import the local image
+// Importing the hero image from the project's assets folder
+import HeroImage from '../assets/hero_image2.png';
 
 function Home() {
+  const navigate = useNavigate();
+  
+  const handleLaunchTrajectory = () => {
+    // Navigate to the home page and open the assessment form without scrolling
+    navigate('/');
+    // Dispatch a custom event to open the assessment form after navigation
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('openAssessmentForm'));
+    }, 100);
+  };
+  
+  const handleJoinCommunity = () => {
+    // Navigate to the AI chat page
+    navigate('/ai-chat');
+  };
+  
   return (
     <>
       <div className="overflow-hidden">
         {/* Shared premium background for hero and stats sections */}
         <div className="relative min-h-screen overflow-hidden">
-          {/* Enhanced gradient background with mesh pattern */}
+          {/* Enhanced gradient background with mesh pattern - Restored as requested */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_40%,rgba(59,130,246,0.15),transparent_70%)] opacity-80" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.15),transparent_70%)] opacity-60" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(6,182,212,0.1),transparent_70%)] opacity-70" />
           
-          {/* Animated gradient orbs */}
+          {/* Animated gradient orbs - Commented out as requested */}
+          {/* 
           <div className="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-r from-blue-600/30 to-cyan-500/20 blur-3xl animate-pulse" />
           <div className="pointer-events-none absolute -bottom-40 -right-40 h-[32rem] w-[32rem] rounded-full bg-gradient-to-r from-purple-600/20 to-pink-500/15 blur-3xl animate-pulse" style={{animationDelay: '2s'}} />
           <div className="pointer-events-none absolute top-1/4 left-1/3 h-80 w-80 rounded-full bg-gradient-to-r from-emerald-500/10 to-teal-400/10 blur-3xl animate-pulse" style={{animationDelay: '4s'}} />
+          */}
 
-          {/* Floating geometric elements */}
+          {/* Floating geometric elements - Commented out as requested */}
+          {/* 
           <div className="pointer-events-none absolute top-20 right-20 w-4 h-4 bg-gradient-to-r from-blue-400 to-cyan-300 rounded-full animate-bounce opacity-60" style={{animationDelay: '1s'}} />
           <div className="pointer-events-none absolute top-40 left-20 w-6 h-6 bg-gradient-to-r from-purple-400 to-pink-300 rounded-full animate-bounce opacity-40" style={{animationDelay: '3s'}} />
           <div className="pointer-events-none absolute bottom-40 left-40 w-3 h-3 bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full animate-bounce opacity-50" style={{animationDelay: '5s'}} />
+          */}
 
           <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-10">
             <div className="flex flex-col lg:flex-row items-center justify-between min-h-screen py-20">
@@ -41,48 +63,48 @@ function Home() {
               {/* Left: Enhanced Copy Section */}
               <div className="lg:w-1/2 lg:pr-16 text-center lg:text-left">
                 {/* Premium badge */}
-                <div className="inline-flex items-center mb-8">
+                <div className="inline-flex items-center mb-8 mt-5">
                   <span className="relative inline-flex items-center text-sm font-bold tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300">
                     <span className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 blur-xl"></span>
                     <span className="relative px-6 py-2 bg-white/9 backdrop-blur-xl border border-white/20 rounded-full text-white">
-                      ✨ AI-Powered Career Guidance ✨
+                      ✨ Strategic Career Design ✨
                     </span>
                   </span>
                 </div>
                 
                 {/* Main headline with gradient text */}
                 <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] mb-8">
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-cyan-200 drop-shadow-2xl">
-                    Your Future
-                  </span>
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 mt-2">
-                    Starts Here
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-cyan-200 drop-shadow-2xl">
+                    Beyond the Blueprint : <span className="text-xl md:text-2xl lg:text-3xl xl:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 whitespace-nowrap">Architecting Your Future</span>
                   </span>
                 </h1>
                 
                 {/* Subtitle with better typography */}
-                <p className="text-xl md:text-2xl text-slate-300/90 leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-10 font-light">
+                <p className="text-lg md:text-xl text-slate-300/90 leading-relaxed max-w-2xl mx-auto lg:mx-0 mb-10 font-light">
                   Transform your career aspirations into reality with our 
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 font-semibold"> AI-driven guidance platform.</span>
                 </p>
 
-                {/* Enhanced CTA buttons */}
-                <div className="flex flex-row gap-6 justify-center lg:justify-start mb-12">
-                  <button className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden whitespace-nowrap">
+                {/* Enhanced CTA buttons - Made responsive to prevent overflow */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+                  <button 
+                    onClick={handleLaunchTrajectory}
+                    className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 rounded-2xl shadow-2xl shadow-blue-900/50 hover:shadow-blue-900/70 transform hover:scale-105 transition-all duration-300 overflow-hidden whitespace-nowrap"
+                  >
                     <span className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                    <span className="relative flex items-center gap-3">
-                      🚀 Start Your Journey
-                      <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
+                    <span className="relative flex items-center">
+                      🚀 Launch Your Trajectory
                     </span>
                   </button>
                   
-                  <button className="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 whitespace-nowrap">
-                    <span className="flex items-center gap-3">
-                      💬 Join Community
-                      <svg className="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h8z" />
+                  <button 
+                    onClick={handleJoinCommunity}
+                    className="group inline-flex items-center justify-center px-6 py-4 text-base font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                  >
+                    <span className="flex items-center gap-2">
+                      💬 AI Navigator
+                      <svg className="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2v-6a2 2 0 012-2h8z" />
                       </svg>
                     </span>
                   </button>
@@ -113,23 +135,23 @@ function Home() {
 
               {/* Right: Career Counselling Illustration */}
               <div className="lg:w-1/2 mt-16 lg:mt-0 relative flex justify-center">
-                <div className="w-full h-96 flex items-center justify-center">
-                  {/* Image container with transparent background */}
-                  <div className="relative p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
+                {/* Additional floating bubbles around the image - Commented out as requested */}
+                {/* 
+                <div className="absolute -top-6 -right-6 w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-pink-300 animate-bounce opacity-60 z-30" style={{animationDelay: '1.5s'}}></div>
+                <div className="absolute bottom-1/4 -left-8 w-4 h-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-300 animate-bounce opacity-50 z-30" style={{animationDelay: '1.2s'}}></div>
+                <div className="absolute bottom-1/3 -right-8 w-3 h-3 rounded-full bg-gradient-to-r from-amber-400 to-orange-300 animate-bounce opacity-60 z-30" style={{animationDelay: '2.5s'}}></div>
+                */}
+                
+                <div className="w-full h-64 sm:h-72 md:h-80 flex items-center justify-center">
+                  {/* Image container with transparent background - Removed transparent background and border as requested */}
+                  <div className="relative">
                     <img 
                       src={HeroImage} 
                       alt="Career guidance illustration showing a businessman standing at road direction signs, making a decision for career path"
-                      className="max-w-full max-h-full object-contain pointer-events-none select-none rounded-lg"
+                      className="max-w-full max-h-full object-contain pointer-events-none select-none border-0 outline-none"
                       draggable="false"
                       onContextMenu={(e) => e.preventDefault()}
                     />
-                    
-                    {/* Bold multi-color gradient sphere at top left */}
-                    <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full z-20">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-600 to-pink-600 blur-lg"></div>
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-b from-cyan-500 via-blue-600 to-purple-700 animate-pulse"></div>
-                      <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-white/20 to-transparent"></div>
-                    </div>
                     
                     {/* 3D Decorative star at bottom right */}
                     <div className="absolute bottom-2 right-4 z-20 transform -rotate-6">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const TalkWithAI = () => {
@@ -7,14 +7,19 @@ const TalkWithAI = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const navigate = useNavigate();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     
     // Check if user is authenticated
     const userData = localStorage.getItem('user');
     if (!userData) {
-      // Redirect to sign-in page
-      window.location.href = '/signin';
+      // Redirect to sign-in page with redirect back to current page
+      navigate('/signin?redirect=/talk-with-ai');
       return;
     }
     
@@ -99,7 +104,10 @@ const TalkWithAI = () => {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-white">
+                <span className="mr-1">Frequently</span>
+                <span className="ml-1">Asked Questions</span>
+              </h2>
               <p className="text-slate-300 mt-2">
                 Find answers to common questions about our AI career guidance platform.
               </p>
