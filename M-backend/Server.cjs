@@ -9,7 +9,7 @@ const { MongoClient } = require("mongodb");
 // 2. Setup App and Middleware
 const app = express();
 const PORT = process.env.PORT || 3001; // Use environment variable
-const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:3000";
+const CORS_ORIGIN = process.env.CORS_ORIGIN || ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:8080"];
 
 // Configure CORS with environment-specific origin
 app.use(cors({
@@ -573,6 +573,147 @@ app.get("/api/vishal/:id", validateApiRequest, async (req, res) => {
   }
 });
 
+// Colleges-specific endpoint with enhanced search and filtering
+app.get("/api/colleges", validateApiRequest, async (req, res) => {
+  try {
+    if (!db) {
+      return res.status(503).json({ 
+        message: "Database connection not available", 
+        error: "Service temporarily unavailable" 
+      });
+    }
+
+    const { search, type, location, limit = 50, skip = 0, sortBy = 'name', sortOrder = 'asc' } = req.query;
+    
+    // Check if colleges collection exists
+    const collections = await db.listCollections({ name: 'Colleges' }).toArray();
+    if (collections.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Colleges collection not found in database"
+      });
+    }
+    
+    const collection = db.collection('Colleges');
+    
+    // Build comprehensive search filter
+    let filter = {};
+    
+    // Text search across multiple fields
+    if (search) {
+      const searchRegex = { $regex: search, $options: "i" };
+      filter.$or = [
+        { college_name: searchRegex },
+        { name: searchRegex },
+        { city: searchRegex },
+        { location: searchRegex },
+        { type: searchRegex },
+        { specialization: searchRegex },
+        { 'courses_offered.undergraduate': { $elemMatch: { $regex: search, $options: "i" } } },
+        { 'courses_offered.postgraduate': { $elemMatch: { $regex: search, $options: "i" } } }
+      ];
+    }
+    
+    // Filter by college type
+    if (type && type !== 'all') {
+      filter.type = { $regex: type, $options: "i" };
+    }
+    
+    // Filter by location
+    if (location) {
+      const locationRegex = { $regex: location, $options: "i" };
+      if (filter.$or) {
+        filter.$and = [
+          { $or: filter.$or },
+          { $or: [
+            { city: locationRegex },
+            { location: locationRegex }
+          ]}
+        ];
+        delete filter.$or;
+      } else {
+        filter.$or = [
+          { city: locationRegex },
+          { location: locationRegex }
+        ];
+      }
+    }
+    
+    // Build sort options
+    let sortOptions = {};
+    const validSortFields = ['college_name', 'name', 'city', 'type', 'founded'];
+    if (validSortFields.includes(sortBy)) {
+      sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    } else {
+      sortOptions['college_name'] = 1; // Default sort
+    }
+    
+    // Execute query with pagination
+    let query = collection.find(filter)
+      .sort(sortOptions)
+      .skip(parseInt(skip))
+      .limit(parseInt(limit));
+    
+    const colleges = await query.toArray();
+    const totalCount = await collection.countDocuments(filter);
+    
+    // Transform data to ensure consistent format
+    const transformedColleges = colleges.map(college => ({
+      _id: college._id,
+      id: college.id || college._id,
+      name: college.college_name || college.name,
+      college_name: college.college_name || college.name,
+      shortName: college.shortName,
+      type: college.type || 'College',
+      city: college.city,
+      location: college.location || college.city,
+      founded: college.founded,
+      specialization: college.specialization,
+      courses_offered: college.courses_offered,
+      courses: college.courses,
+      placement: college.placement,
+      recommendation: college.recommendation,
+      seats: college.seats,
+      website: college.website,
+      fees: college.fees,
+      intake: college.intake,
+      admissionPath: college.admissionPath,
+      whyConsider: college.whyConsider,
+      placements: college.placements,
+      reservation: college.reservation,
+      rating: college.rating
+    }));
+    
+    console.log(`✅ Colleges API: ${colleges.length} records fetched (${totalCount} total) with filters:`, {
+      search, type, location
+    });
+    
+    res.json({
+      success: true,
+      colleges: transformedColleges,
+      count: colleges.length,
+      totalCount: totalCount,
+      pagination: {
+        limit: parseInt(limit),
+        skip: parseInt(skip),
+        hasMore: (parseInt(skip) + colleges.length) < totalCount
+      },
+      filters: {
+        search: search || null,
+        type: type || 'all',
+        location: location || null
+      }
+    });
+  } catch (err) {
+    console.error("❌ Failed to fetch colleges:", err);
+    res.status(500).json({ 
+      success: false,
+      message: "Error fetching colleges data",
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    });
+  }
+});
+
 // 7. 404 handler for undefined routes
 app.use((req, res) => {
   res.status(404).json({ 
@@ -597,7 +738,7 @@ connectDB().then(() => {
   const server = app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
     console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 CORS enabled for: ${CORS_ORIGIN}`);
+    console.log(`🔗 CORS enabled for: ${Array.isArray(CORS_ORIGIN) ? CORS_ORIGIN.join(', ') : CORS_ORIGIN}`);
   });
 
   // Handle server errors

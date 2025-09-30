@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive API Connection Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Status</h3>
+        <div id="status">Ready to test...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>Backend Health Check</h3>
+        <button onclick="testBackendHealth()">Test Backend Health</button>
+        <div id="backend-health"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Colleges API Test</h3>
+        <button onclick="testCollegesAPI()">Test Colleges API</button>
+        <div id="colleges-api"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>CORS Test</h3>
+        <button onclick="testCORS()">Test CORS Headers</button>
+        <div id="cors-test"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Frontend-Backend Integration Test</h3>
+        <button onclick="testIntegration()">Test Full Integration</button>
+        <div id="integration-test"></div>
+    </div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.parentElement.className = `test-section ${type}`;
+        }
+
+        async function testBackendHealth() {
+            const resultDiv = document.getElementById('backend-health');
+            resultDiv.innerHTML = 'Testing backend health...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Backend Health Check Passed</h4>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                updateStatus('Backend is running and healthy', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Backend Health Check Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure the backend server is running on http://localhost:3001</p>
+                    </div>
+                `;
+                updateStatus('Backend is not accessible', 'error');
+            }
+        }
+
+        async function testCollegesAPI() {
+            const resultDiv = document.getElementById('colleges-api');
+            resultDiv.innerHTML = 'Testing colleges API...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/colleges');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Colleges API Working</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Success:</strong> ${data.success}</p>
+                        <p><strong>Colleges Count:</strong> ${data.count}</p>
+                        <p><strong>Total Count:</strong> ${data.totalCount}</p>
+                        <details>
+                            <summary>View Sample Data</summary>
+                            <pre>${JSON.stringify(data.colleges?.slice(0, 2), null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                updateStatus('Colleges API is working correctly', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Colleges API Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>This might be a CORS issue or network problem.</p>
+                    </div>
+                `;
+                updateStatus('Colleges API failed', 'error');
+            }
+        }
+
+        async function testCORS() {
+            const resultDiv = document.getElementById('cors-test');
+            resultDiv.innerHTML = 'Testing CORS headers...';
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/colleges', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Vary': response.headers.get('Vary')
+                };
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ CORS Headers Present</h4>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                        <p><strong>Origin Allowed:</strong> ${corsHeaders['Access-Control-Allow-Origin']}</p>
+                    </div>
+                `;
+                updateStatus('CORS headers are configured correctly', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ CORS Test Failed</h4>
+                        <p>Error: ${error.message}</p>
+                        <p>This indicates a CORS configuration issue.</p>
+                    </div>
+                `;
+                updateStatus('CORS test failed', 'error');
+            }
+        }
+
+        async function testIntegration() {
+            const resultDiv = document.getElementById('integration-test');
+            resultDiv.innerHTML = 'Testing full integration...';
+            
+            try {
+                // Test the exact same call that Colleges.jsx makes
+                const params = new URLSearchParams();
+                const apiUrl = `http://localhost:3001/api/colleges?${params.toString()}`;
+                
+                console.log('Testing API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Full Integration Test Passed</h4>
+                        <p><strong>API URL:</strong> ${apiUrl}</p>
+                        <p><strong>Response Status:</strong> ${response.status}</p>
+                        <p><strong>Data Success:</strong> ${data.success}</p>
+                        <p><strong>Colleges Returned:</strong> ${data.colleges?.length || 0}</p>
+                        <p><strong>Total Available:</strong> ${data.totalCount || 0}</p>
+                        <details>
+                            <summary>View First College Data</summary>
+                            <pre>${JSON.stringify(data.colleges?.[0], null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                updateStatus('Full integration test passed - Frontend should work!', 'success');
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Integration Test Failed</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Stack:</strong> ${error.stack}</p>
+                        <p>This is the exact error that Colleges.jsx would encounter.</p>
+                    </div>
+                `;
+                updateStatus('Integration test failed - Frontend will have issues', 'error');
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            updateStatus('Starting comprehensive tests...', 'info');
+            setTimeout(() => testBackendHealth(), 500);
+            setTimeout(() => testCollegesAPI(), 1000);
+            setTimeout(() => testCORS(), 1500);
+            setTimeout(() => testIntegration(), 2000);
+        };
+    </script>
+</body>
+</html>

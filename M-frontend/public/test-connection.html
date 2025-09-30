@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; max-height: 400px; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Connection Test</h1>
+    <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+    
+    <div class="test-section">
+        <h3>Test Backend API from Frontend Context</h3>
+        <button onclick="testBackendAPI()">Test Backend API</button>
+        <div id="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Vite Proxy</h3>
+        <button onclick="testViteProxy()">Test Vite Proxy</button>
+        <div id="proxy-result"></div>
+    </div>
+
+    <script>
+        // Display current URL
+        document.getElementById('current-url').textContent = window.location.href;
+
+        async function testBackendAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing backend API...';
+            
+            try {
+                console.log('Testing backend API from frontend context...');
+                
+                const response = await fetch('http://localhost:3001/api/colleges', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+                
+                console.log('Response received:', response);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Backend API Test Successful!</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Success:</strong> ${data.success}</p>
+                        <p><strong>Colleges Count:</strong> ${data.count}</p>
+                        <p><strong>Total Count:</strong> ${data.totalCount}</p>
+                        <p><strong>CORS Headers:</strong></p>
+                        <ul>
+                            <li>Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin')}</li>
+                            <li>Access-Control-Allow-Credentials: ${response.headers.get('Access-Control-Allow-Credentials')}</li>
+                        </ul>
+                        <details>
+                            <summary>View Sample Data</summary>
+                            <pre>${JSON.stringify(data.colleges?.slice(0, 2), null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Backend API test error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Backend API Test Failed!</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p><strong>Error Type:</strong> ${error.name}</p>
+                        <p>This indicates a CORS or network issue.</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testViteProxy() {
+            const resultDiv = document.getElementById('proxy-result');
+            resultDiv.innerHTML = 'Testing Vite proxy...';
+            
+            try {
+                console.log('Testing Vite proxy...');
+                
+                const response = await fetch('/api/colleges', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                console.log('Proxy response received:', response);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Proxy data received:', data);
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Vite Proxy Test Successful!</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Success:</strong> ${data.success}</p>
+                        <p><strong>Colleges Count:</strong> ${data.count}</p>
+                        <p><strong>Total Count:</strong> ${data.totalCount}</p>
+                        <details>
+                            <summary>View Sample Data</summary>
+                            <pre>${JSON.stringify(data.colleges?.slice(0, 2), null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Vite proxy test error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Vite Proxy Test Failed!</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>This indicates the Vite proxy is not configured or working.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            console.log('Page loaded, starting tests...');
+            testBackendAPI();
+            testViteProxy();
+        };
+    </script>
+</body>
+</html>

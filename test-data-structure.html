@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Data Structure Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; max-height: 400px; }
+        .college-item { border: 1px solid #ccc; margin: 10px 0; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Database Data Structure Test</h1>
+    
+    <div class="test-section">
+        <h3>Test Database Connection and Data Structure</h3>
+        <button onclick="testDatabaseData()">Test Database Data</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testDatabaseData() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing database connection...';
+            
+            try {
+                console.log('Testing database connection...');
+                
+                const response = await fetch('http://localhost:3001/api/colleges', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Database data received:', data);
+                
+                // Display success message
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Database Connection Successful!</h4>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>Success:</strong> ${data.success}</p>
+                        <p><strong>Colleges Count:</strong> ${data.count}</p>
+                        <p><strong>Total Count:</strong> ${data.totalCount}</p>
+                        
+                        <h5>Sample College Data:</h5>
+                        <div class="college-item">
+                            <strong>College 1:</strong>
+                            <pre>${JSON.stringify(data.colleges?.[0], null, 2)}</pre>
+                        </div>
+                        
+                        <h5>All Colleges Data:</h5>
+                        <details>
+                            <summary>Click to view all colleges data</summary>
+                            <pre>${JSON.stringify(data.colleges, null, 2)}</pre>
+                        </details>
+                        
+                        <h5>Data Structure Analysis:</h5>
+                        <ul>
+                            <li><strong>First College Name:</strong> ${data.colleges?.[0]?.name || data.colleges?.[0]?.college_name || 'N/A'}</li>
+                            <li><strong>First College Type:</strong> ${data.colleges?.[0]?.type || 'N/A'}</li>
+                            <li><strong>First College Location:</strong> ${data.colleges?.[0]?.city || data.colleges?.[0]?.location || 'N/A'}</li>
+                            <li><strong>First College Founded:</strong> ${data.colleges?.[0]?.founded || 'N/A'}</li>
+                        </ul>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Database test error:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Database Connection Failed!</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                        <p>Make sure the backend server is running on http://localhost:3001</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run test on page load
+        window.onload = function() {
+            console.log('Page loaded, testing database data...');
+            testDatabaseData();
+        };
+    </script>
+</body>
+</html>
