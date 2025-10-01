@@ -11,6 +11,7 @@ import AIChat from "./views/AIChat";
 import Trending from "./views/Trending";
 import Roadmap from "./views/Roadmap";
 import Colleges from "./views/Colleges";
+import CollegesTest from "./views/CollegesTest";
 import Terms from "./views/Terms";
 import Privacy from "./views/Privacy";
 import CareerFields from "./views/CareerFields";
@@ -45,6 +46,7 @@ function AppContent() {
           <Route path="/trending" element={<><ScrollToTop /><Trending /></>} />
           <Route path="/roadmap" element={<><ScrollToTop /><Roadmap /></>} />
           <Route path="/colleges" element={<><ScrollToTop /><Colleges /></>} />
+          <Route path="/colleges-test" element={<><ScrollToTop /><CollegesTest /></>} />
           <Route path="/career-fields" element={<><ScrollToTop /><CareerFields /></>} />
           <Route path="/terms" element={<><ScrollToTop /><Terms /></>} />
           <Route path="/privacy" element={<><ScrollToTop /><Privacy /></>} />

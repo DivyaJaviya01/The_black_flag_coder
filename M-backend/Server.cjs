@@ -8,15 +8,67 @@ const { MongoClient } = require("mongodb");
 
 // 2. Setup App and Middleware
 const app = express();
-const PORT = process.env.PORT || 3001; // Use environment variable
-const CORS_ORIGIN = process.env.CORS_ORIGIN || ["http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:8080"];
 
-// Configure CORS with environment-specific origin
+// Specific port configuration - tries ALL ports in preferred order
+const PREFERRED_PORTS = [3000, 3001, 3002, 5174, 8000, 5000, 3003, 8001, 5173, 4000, 8080];
+const REQUESTED_PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || null;
+
+console.log(`🚀 Starting server...`);
+if (REQUESTED_PORT) {
+  console.log(`🎯 Requested port: ${REQUESTED_PORT}`);
+} else {
+  console.log(`🎯 Will try all preferred ports: ${PREFERRED_PORTS.join(', ')}`);
+}
+console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
+
+// Enhanced CORS configuration for all ports
+const CORS_ORIGIN = process.env.CORS_ORIGIN || [];
+
+// Function to check if port is in preferred list
+function isPreferredPort(port) {
+  return PREFERRED_PORTS.includes(port);
+}
+
+// Universal CORS configuration for preferred ports
 app.use(cors({
-  origin: CORS_ORIGIN,
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (Postman, mobile apps, local files)
+    if (!origin) return callback(null, true);
+    
+    // Allow file:// protocol for local HTML files
+    if (origin.startsWith('file://')) return callback(null, true);
+    
+    // Allow ALL localhost and 127.0.0.1 with ANY port
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    // For development mode, allow all origins
+    if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('CORS policy violation'), false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
-app.use(express.json({ limit: '10mb' })); // Middleware to parse JSON bodies with size limit
+app.use(express.json({ limit: '10mb' }));
+
+// Simple request logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - ${new Date().toISOString()}`);
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  next();
+});
+
+// Serve static files from public directory
+app.use(express.static('public'));
 
 // 3. Setup MongoDB Connection
 const mongoUri = process.env.MONGODB_URI;
@@ -60,19 +112,14 @@ async function gracefulShutdown() {
 process.on('SIGINT', gracefulShutdown);
 process.on('SIGTERM', gracefulShutdown);
 
-// 4. Middleware for request validation
+// 4. Simple request validation
 function validateApiRequest(req, res, next) {
-  // Add request logging
-  console.log(`📥 ${req.method} ${req.path} - ${new Date().toISOString()}`);
-  
-  // Add any specific validation logic here
   if (req.query.limit && (isNaN(req.query.limit) || req.query.limit < 0)) {
     return res.status(400).json({
       success: false,
       message: "Invalid limit parameter. Must be a positive number."
     });
   }
-  
   next();
 }
 
@@ -733,23 +780,48 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 9. Start the Server
+// 9. Start the Server - Try ALL preferred ports in order
 connectDB().then(() => {
-  const server = app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 CORS enabled for: ${Array.isArray(CORS_ORIGIN) ? CORS_ORIGIN.join(', ') : CORS_ORIGIN}`);
-  });
-
-  // Handle server errors
-  server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${PORT} is already in use`);
+  const tryPort = (portIndex = 0) => {
+    let currentPort;
+    
+    // If specific port was requested via command line or environment
+    if (REQUESTED_PORT && portIndex === 0) {
+      currentPort = REQUESTED_PORT;
+      console.log(`🎯 Trying requested port: ${currentPort}`);
     } else {
-      console.error('❌ Server error:', err);
+      // Calculate the correct index for preferred ports
+      const preferredIndex = REQUESTED_PORT ? portIndex - 1 : portIndex;
+      
+      if (preferredIndex >= PREFERRED_PORTS.length) {
+        console.error(`❌ All preferred ports [${PREFERRED_PORTS.join(', ')}] are in use`);
+        process.exit(1);
+      }
+      
+      currentPort = PREFERRED_PORTS[preferredIndex];
+      console.log(`🎯 Trying preferred port: ${currentPort} (${preferredIndex + 1}/${PREFERRED_PORTS.length})`);
     }
-    process.exit(1);
-  });
+    
+    const server = app.listen(currentPort, () => {
+      console.log(`✅ Server running on http://localhost:${currentPort}`);
+      console.log(`📊 Database: Connected to MongoDB Atlas`);
+      console.log(`🔗 CORS: Enabled for localhost origins`);
+      console.log(`🎉 Ready to serve requests!`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`⚠️  Port ${currentPort} is busy, trying next...`);
+        tryPort(portIndex + 1);
+      } else {
+        console.error('❌ Server error:', err);
+        process.exit(1);
+      }
+    });
+  };
+  
+  tryPort();
+  
 }).catch((err) => {
   console.error("❌ Failed to start server:", err);
   process.exit(1);

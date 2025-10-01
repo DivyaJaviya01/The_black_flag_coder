@@ -1,5 +1,8 @@
 // API configuration
 export const API_CONFIG = {
+  // Backend API Base URL
+  BASE_URL: 'http://localhost:5173',
+  
   // Google AI API key
   GOOGLE_AI_KEY: 'AIzaSyAE3W1w8Ae8WAXRZcctwI68sVKVaMuiIUo',
   

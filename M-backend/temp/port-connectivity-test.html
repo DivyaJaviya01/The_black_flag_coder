@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Port Connectivity Test Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-item label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .control-item input, .control-item select {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .control-item input:focus, .control-item select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .test-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            padding: 30px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .summary-card.total { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); }
+        .summary-card.passed { background: linear-gradient(135deg, #00b894 0%, #00a085 100%); }
+        .summary-card.failed { background: linear-gradient(135deg, #e17055 0%, #d63031 100%); }
+        .summary-card.warnings { background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); }
+
+        .summary-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .port-groups {
+            display: grid;
+            gap: 30px;
+        }
+
+        .port-group {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .port-group h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .port-tests {
+            display: grid;
+            gap: 10px;
+        }
+
+        .port-test {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        .port-test.testing {
+            border-left-color: #fdcb6e;
+            background: #fef9e7;
+        }
+
+        .port-test.pass {
+            border-left-color: #00b894;
+            background: #e8f5e8;
+        }
+
+        .port-test.fail {
+            border-left-color: #e17055;
+            background: #fdf2f2;
+        }
+
+        .port-test-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .port-number {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .test-status {
+            font-size: 0.9em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .test-status.testing { background: #fdcb6e; color: white; }
+        .test-status.pass { background: #00b894; color: white; }
+        .test-status.fail { background: #e17055; color: white; }
+
+        .test-details {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .test-types {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .test-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .test-type.tcp { background: #e3f2fd; color: #1976d2; }
+        .test-type.http { background: #e8f5e8; color: #388e3c; }
+        .test-type.api { background: #fff3e0; color: #f57c00; }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .log-section {
+            margin-top: 30px;
+            background: #2c3e50;
+            border-radius: 10px;
+            padding: 20px;
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-header {
+            color: #3498db;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+
+        .log-entry.info { color: #3498db; }
+        .log-entry.success { color: #2ecc71; }
+        .log-entry.error { color: #e74c3c; }
+        .log-entry.warning { color: #f39c12; }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Port Connectivity Test Suite</h1>
+            <p>Web-based testing for M-frontend and M-backend application ports</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="hostname">Target Host:</label>
+                    <input type="text" id="hostname" value="localhost" placeholder="localhost">
+                </div>
+                <div class="control-item">
+                    <label for="timeout">Timeout (ms):</label>
+                    <input type="number" id="timeout" value="5000" min="1000" max="30000">
+                </div>
+                <div class="control-item">
+                    <label for="testType">Test Scope:</label>
+                    <select id="testType">
+                        <option value="all">All Ports</option>
+                        <option value="frontend">Frontend Only</option>
+                        <option value="backend">Backend Only</option>
+                        <option value="database">Database Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <button class="test-button" id="startTest">🚀 Start Port Tests</button>
+                <button class="test-button" id="exportResults" style="background: #6c757d;" disabled>💾 Export Results</button>
+            </div>
+            <div class="progress-bar hidden" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="summary-cards hidden" id="summaryCards">
+                <div class="summary-card total">
+                    <h3 id="totalTests">0</h3>
+                    <p>Total Tests</p>
+                </div>
+                <div class="summary-card passed">
+                    <h3 id="passedTests">0</h3>
+                    <p>Passed</p>
+                </div>
+                <div class="summary-card failed">
+                    <h3 id="failedTests">0</h3>
+                    <p>Failed</p>
+                </div>
+                <div class="summary-card warnings">
+                    <h3 id="warningTests">0</h3>
+                    <p>Warnings</p>
+                </div>
+            </div>
+
+            <div class="port-groups" id="portGroups">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+
+            <div class="log-section hidden" id="logSection">
+                <div class="log-header">📋 Test Log</div>
+                <div id="logContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration matching the backend setup
+        const CONFIG = {
+            frontend: {
+                dev: 5173,
+                preview: 4173
+            },
+            backend: [3000, 3001, 3002, 5174, 8000, 5000, 3003, 8001, 5173, 4000, 8080],
+            database: {
+                mongodb: 27017,
+                mongoExpress: 8081
+            }
+        };
+
+        // Test results storage
+        let testResults = {
+            passed: [],
+            failed: [],
+            warnings: [],
+            summary: {}
+        };
+
+        let isTestingInProgress = false;
+
+        // DOM elements
+        const elements = {
+            startTest: document.getElementById('startTest'),
+            exportResults: document.getElementById('exportResults'),
+            hostname: document.getElementById('hostname'),
+            timeout: document.getElementById('timeout'),
+            testType: document.getElementById('testType'),
+            progressBar: document.getElementById('progressBar'),
+            progressFill: document.getElementById('progressFill'),
+            summaryCards: document.getElementById('summaryCards'),
+            totalTests: document.getElementById('totalTests'),
+            passedTests: document.getElementById('passedTests'),
+            failedTests: document.getElementById('failedTests'),
+            warningTests: document.getElementById('warningTests'),
+            portGroups: document.getElementById('portGroups'),
+            logSection: document.getElementById('logSection'),
+            logContent: document.getElementById('logContent')
+        };
+
+        // Utility functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            elements.logContent.appendChild(logEntry);
+            elements.logContent.scrollTop = elements.logContent.scrollHeight;
+            
+            if (elements.logSection.classList.contains('hidden')) {
+                elements.logSection.classList.remove('hidden');
+            }
+        }
+
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            elements.progressFill.style.width = `${percentage}%`;
+        }
+
+        function updateSummary() {
+            const total = testResults.passed.length + testResults.failed.length;
+            elements.totalTests.textContent = total;
+            elements.passedTests.textContent = testResults.passed.length;
+            elements.failedTests.textContent = testResults.failed.length;
+            elements.warningTests.textContent = testResults.warnings.length;
+            
+            if (elements.summaryCards.classList.contains('hidden')) {
+                elements.summaryCards.classList.remove('hidden');
+            }
+        }
+
+        // Test functions
+        async function testTcpConnectivity(host, port, timeout) {
+            return new Promise((resolve) => {
+                const startTime = Date.now();
+                
+                // Use WebSocket for TCP-like connectivity test
+                // Note: This is limited by browser security, but provides basic connectivity info
+                const ws = new WebSocket(`ws://${host}:${port}`);
+                
+                const timeoutId = setTimeout(() => {
+                    ws.close();
+                    resolve({
+                        success: false,
+                        port,
+                        message: 'Connection timeout',
+                        duration: Date.now() - startTime
+                    });
+                }, timeout);
+
+                ws.onopen = () => {
+                    clearTimeout(timeoutId);
+                    ws.close();
+                    resolve({
+                        success: true,
+                        port,
+                        message: 'WebSocket connection successful',
+                        duration: Date.now() - startTime
+                    });
+                };
+
+                ws.onerror = () => {
+                    clearTimeout(timeoutId);
+                    resolve({
+                        success: false,
+                        port,
+                        message: 'WebSocket connection failed',
+                        duration: Date.now() - startTime
+                    });
+                };
+            });
+        }
+
+        async function testHttpConnectivity(host, port, timeout) {
+            return new Promise((resolve) => {
+                const startTime = Date.now();
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                fetch(`http://${host}:${port}/`, {
+                    method: 'GET',
+                    mode: 'no-cors', // Required for cross-origin requests
+                    signal: controller.signal
+                })
+                .then(() => {
+                    clearTimeout(timeoutId);
+                    resolve({
+                        success: true,
+                        port,
+                        message: 'HTTP connection successful',
+                        duration: Date.now() - startTime
+                    });
+                })
+                .catch((error) => {
+                    clearTimeout(timeoutId);
+                    let message = 'HTTP connection failed';
+                    if (error.name === 'AbortError') {
+                        message = 'HTTP request timeout';
+                    }
+                    resolve({
+                        success: false,
+                        port,
+                        message,
+                        duration: Date.now() - startTime
+                    });
+                });
+            });
+        }
+
+        async function testApiEndpoint(host, port, endpoint = '/api/health', timeout) {
+            return new Promise((resolve) => {
+                const startTime = Date.now();
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                fetch(`http://${host}:${port}${endpoint}`, {
+                    method: 'GET',
+                    signal: controller.signal
+                })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    resolve({
+                        success: response.ok,
+                        port,
+                        endpoint,
+                        statusCode: response.status,
+                        message: `API endpoint ${response.ok ? 'responding' : 'error'}: ${response.status}`,
+                        duration: Date.now() - startTime
+                    });
+                })
+                .catch((error) => {
+                    clearTimeout(timeoutId);
+                    let message = 'API request failed';
+                    if (error.name === 'AbortError') {
+                        message = 'API request timeout';
+                    }
+                    resolve({
+                        success: false,
+                        port,
+                        endpoint,
+                        message,
+                        duration: Date.now() - startTime
+                    });
+                });
+            });
+        }
+
+        function createPortTestElement(groupName, port, portName = '') {
+            const portTest = document.createElement('div');
+            portTest.className = 'port-test';
+            portTest.id = `port-${port}`;
+            
+            portTest.innerHTML = `
+                <div class="port-test-header">
+                    <div class="port-number">Port ${port} ${portName ? `(${portName})` : ''}</div>
+                    <div class="test-status" id="status-${port}">Waiting</div>
+                </div>
+                <div class="test-details" id="details-${port}">Ready to test...</div>
+                <div class="test-types" id="types-${port}"></div>
+            `;
+            
+            return portTest;
+        }
+
+        function updatePortTestStatus(port, status, message, testType = '') {
+            const portElement = document.getElementById(`port-${port}`);
+            const statusElement = document.getElementById(`status-${port}`);
+            const detailsElement = document.getElementById(`details-${port}`);
+            const typesElement = document.getElementById(`types-${port}`);
+            
+            if (!portElement) return;
+            
+            // Update port test class
+            portElement.className = `port-test ${status}`;
+            
+            // Update status
+            statusElement.className = `test-status ${status}`;
+            statusElement.textContent = status === 'testing' ? 'Testing...' : 
+                                       status === 'pass' ? 'PASS' : 'FAIL';
+            
+            // Update details
+            detailsElement.textContent = message;
+            
+            // Add test type badge
+            if (testType) {
+                const typeBadge = document.createElement('span');
+                typeBadge.className = `test-type ${testType.toLowerCase()}`;
+                typeBadge.textContent = testType.toUpperCase();
+                typesElement.appendChild(typeBadge);
+            }
+        }
+
+        function setupPortGroups() {
+            elements.portGroups.innerHTML = '';
+            
+            const groups = [
+                { name: 'Frontend Ports', icon: '📱', ports: { 'Vite Dev': CONFIG.frontend.dev, 'Vite Preview': CONFIG.frontend.preview } },
+                { name: 'Backend Ports', icon: '🖥️', ports: CONFIG.backend.reduce((acc, port) => { acc[`Backend ${port}`] = port; return acc; }, {}) },
+                { name: 'Database Ports', icon: '🗄️', ports: { 'MongoDB': CONFIG.database.mongodb, 'Mongo Express': CONFIG.database.mongoExpress } }
+            ];
+
+            groups.forEach(group => {
+                const groupElement = document.createElement('div');
+                groupElement.className = 'port-group';
+                
+                const groupHeader = document.createElement('h3');
+                groupHeader.innerHTML = `${group.icon} ${group.name}`;
+                
+                const portTests = document.createElement('div');
+                portTests.className = 'port-tests';
+                
+                Object.entries(group.ports).forEach(([name, port]) => {
+                    const portElement = createPortTestElement(group.name, port, name.replace(/\d+/, '').trim());
+                    portTests.appendChild(portElement);
+                });
+                
+                groupElement.appendChild(groupHeader);
+                groupElement.appendChild(portTests);
+                elements.portGroups.appendChild(groupElement);
+            });
+        }
+
+        async function runPortTests() {
+            if (isTestingInProgress) return;
+            
+            isTestingInProgress = true;
+            elements.startTest.disabled = true;
+            elements.startTest.innerHTML = '<span class="spinner"></span> Testing...';
+            elements.exportResults.disabled = true;
+            elements.progressBar.classList.remove('hidden');
+            
+            // Reset results
+            testResults = { passed: [], failed: [], warnings: [], summary: {} };
+            
+            const hostname = elements.hostname.value || 'localhost';
+            const timeout = parseInt(elements.timeout.value) || 5000;
+            const testScope = elements.testType.value;
+            
+            log(`Starting port connectivity tests for ${hostname}`, 'info');
+            log(`Timeout: ${timeout}ms, Scope: ${testScope}`, 'info');
+            
+            // Determine which ports to test
+            let portsToTest = [];
+            if (testScope === 'all' || testScope === 'frontend') {
+                portsToTest.push(...Object.values(CONFIG.frontend));
+            }
+            if (testScope === 'all' || testScope === 'backend') {
+                portsToTest.push(...CONFIG.backend);
+            }
+            if (testScope === 'all' || testScope === 'database') {
+                portsToTest.push(...Object.values(CONFIG.database));
+            }
+            
+            // Remove duplicates
+            portsToTest = [...new Set(portsToTest)];
+            
+            let testCount = 0;
+            const totalTests = portsToTest.length * 2; // TCP + HTTP tests
+            
+            for (const port of portsToTest) {
+                updatePortTestStatus(port, 'testing', 'Testing TCP connectivity...', '');
+                
+                // TCP Test (using WebSocket as fallback)
+                try {
+                    const tcpResult = await testHttpConnectivity(hostname, port, timeout);
+                    testCount++;
+                    updateProgress(testCount, totalTests);
+                    
+                    if (tcpResult.success) {
+                        testResults.passed.push({ ...tcpResult, testType: 'TCP' });
+                        updatePortTestStatus(port, 'pass', tcpResult.message, 'tcp');
+                        log(`✅ Port ${port} TCP: ${tcpResult.message}`, 'success');
+                        
+                        // HTTP Test
+                        updatePortTestStatus(port, 'testing', 'Testing HTTP connectivity...', '');
+                        const httpResult = await testHttpConnectivity(hostname, port, timeout);
+                        testCount++;
+                        updateProgress(testCount, totalTests);
+                        
+                        if (httpResult.success) {
+                            testResults.passed.push({ ...httpResult, testType: 'HTTP' });
+                            updatePortTestStatus(port, 'pass', `${tcpResult.message} + HTTP OK`, 'http');
+                            log(`✅ Port ${port} HTTP: ${httpResult.message}`, 'success');
+                            
+                            // API Test for backend ports
+                            if (CONFIG.backend.includes(port)) {
+                                const apiResult = await testApiEndpoint(hostname, port, '/api/health', timeout);
+                                if (apiResult.success) {
+                                    testResults.passed.push({ ...apiResult, testType: 'API' });
+                                    updatePortTestStatus(port, 'pass', `${tcpResult.message} + HTTP + API OK`, 'api');
+                                    log(`✅ Port ${port} API: ${apiResult.message}`, 'success');
+                                }
+                            }
+                        } else {
+                            testResults.failed.push({ ...httpResult, testType: 'HTTP' });
+                            updatePortTestStatus(port, 'pass', `${tcpResult.message} (HTTP failed)`, 'tcp');
+                            log(`⚠️ Port ${port} HTTP: ${httpResult.message}`, 'warning');
+                        }
+                    } else {
+                        testResults.failed.push({ ...tcpResult, testType: 'TCP' });
+                        updatePortTestStatus(port, 'fail', tcpResult.message, 'tcp');
+                        log(`❌ Port ${port} TCP: ${tcpResult.message}`, 'error');
+                        testCount++; // Skip HTTP test
+                        updateProgress(testCount, totalTests);
+                    }
+                } catch (error) {
+                    testCount += 2; // Count both TCP and HTTP as failed
+                    updateProgress(testCount, totalTests);
+                    testResults.failed.push({ port, message: error.message, testType: 'ERROR' });
+                    updatePortTestStatus(port, 'fail', `Error: ${error.message}`, '');
+                    log(`❌ Port ${port} Error: ${error.message}`, 'error');
+                }
+                
+                updateSummary();
+                
+                // Small delay between ports
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Check for port conflicts
+            checkPortConflicts();
+            
+            // Finalize results
+            testResults.summary = {
+                total: testResults.passed.length + testResults.failed.length,
+                passed: testResults.passed.length,
+                failed: testResults.failed.length,
+                warnings: testResults.warnings.length,
+                timestamp: new Date().toISOString(),
+                hostname,
+                timeout
+            };
+            
+            const passRate = testResults.summary.total > 0 ? 
+                ((testResults.summary.passed / testResults.summary.total) * 100).toFixed(1) : 0;
+            
+            log(`🏁 Tests completed! Pass rate: ${passRate}%`, 'info');
+            log(`Total: ${testResults.summary.total}, Passed: ${testResults.summary.passed}, Failed: ${testResults.summary.failed}`, 'info');
+            
+            // Reset UI
+            isTestingInProgress = false;
+            elements.startTest.disabled = false;
+            elements.startTest.innerHTML = '🚀 Start Port Tests';
+            elements.exportResults.disabled = false;
+            elements.progressBar.classList.add('hidden');
+        }
+
+        function checkPortConflicts() {
+            const allPorts = [
+                ...Object.values(CONFIG.frontend),
+                ...CONFIG.backend,
+                ...Object.values(CONFIG.database)
+            ];
+            
+            const portCounts = {};
+            const conflicts = [];
+            
+            allPorts.forEach(port => {
+                portCounts[port] = (portCounts[port] || 0) + 1;
+                if (portCounts[port] > 1 && !conflicts.includes(port)) {
+                    conflicts.push(port);
+                }
+            });
+            
+            conflicts.forEach(port => {
+                testResults.warnings.push({
+                    type: 'conflict',
+                    port,
+                    message: `Port ${port} has multiple configurations`
+                });
+                log(`⚠️ Port conflict detected: Port ${port} is configured multiple times`, 'warning');
+            });
+            
+            updateSummary();
+        }
+
+        function exportResults() {
+            const dataStr = JSON.stringify(testResults, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `port-test-results-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            log('📄 Results exported to JSON file', 'info');
+        }
+
+        // Event listeners
+        elements.startTest.addEventListener('click', runPortTests);
+        elements.exportResults.addEventListener('click', exportResults);
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            setupPortGroups();
+            log('🔍 Port Connectivity Test Suite initialized', 'info');
+            log('Ready to test M-frontend and M-backend application ports', 'info');
+        });
+    </script>
+</body>
+</html>

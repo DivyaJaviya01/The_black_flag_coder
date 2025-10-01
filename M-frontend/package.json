@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:ports": "node ../port-connectivity-test.js",
+    "test:ports:json": "node ../port-connectivity-test.js --json",
+    "test:ports:web": "start ../port-connectivity-test.html"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.5",

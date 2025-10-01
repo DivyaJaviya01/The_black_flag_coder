@@ -8,6 +8,7 @@ const Colleges = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [fetchInProgress, setFetchInProgress] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -23,29 +24,57 @@ const Colleges = () => {
     }
   }, []);
 
+  // Test server connectivity
+  const testServerConnection = async () => {
+    try {
+      console.log('🔧 Testing server connectivity...');
+      const healthResponse = await fetch(`${API_CONFIG.BASE_URL}/api/health`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      console.log('✅ Server connectivity test result:', {
+        status: healthResponse.status,
+        ok: healthResponse.ok
+      });
+      return healthResponse.ok;
+    } catch (error) {
+      console.error('❌ Server connectivity test failed:', error.message);
+      return false;
+    }
+  };
+
   // Fetch colleges from database
   const fetchColleges = async (query = '', type = 'all') => {
+    // Prevent multiple simultaneous requests
+    if (fetchInProgress) {
+      console.log('🚫 Fetch already in progress, skipping...');
+      return;
+    }
+    
     console.log('🚀 Fetching colleges with params:', { query, type });
+    setFetchInProgress(true);
     setLoading(true);
     setError(null);
     
     try {
+      // First test server connectivity
+      const isServerReachable = await testServerConnection();
+      if (!isServerReachable) {
+        throw new Error(`Backend server is not reachable on ${API_CONFIG.BASE_URL}`);
+      }
+      
       const params = new URLSearchParams();
       if (query) params.append('search', query);
       if (type !== 'all') params.append('type', type);
       
-      const apiUrl = `http://localhost:3001/api/colleges?${params.toString()}`;
+      const apiUrl = `${API_CONFIG.BASE_URL}/api/colleges?${params.toString()}`;
       console.log('📡 API URL:', apiUrl);
       
       console.log('🔄 Making fetch request...');
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'cors'
-      });
       
+      // Simplified fetch without extra headers to avoid CORS issues
+      const response = await fetch(apiUrl);
       console.log('📥 Response received:', {
         status: response.status,
         ok: response.ok,
@@ -56,7 +85,7 @@ const Colleges = () => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Response not OK. Response text:', errorText);
-        throw new Error(`Failed to fetch colleges from database: ${response.status} ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       console.log('🔄 Parsing JSON...');
@@ -69,32 +98,58 @@ const Colleges = () => {
         firstCollegeName: data.colleges?.[0]?.name || data.colleges?.[0]?.college_name || 'No name'
       });
       
-      console.log('🔄 Setting colleges state...');
-      setColleges(data.colleges || []);
-      console.log('✅ Colleges state set successfully');
-      
-      // Clear any previous errors if successful
-      if (data.colleges && data.colleges.length > 0) {
-        console.log('✅ Data fetch successful, clearing any previous errors');
-        setError(null);
+      // Validate data structure
+      if (!data.success) {
+        throw new Error('API returned success: false');
       }
       
+      if (!Array.isArray(data.colleges)) {
+        throw new Error('API did not return colleges array');
+      }
+      
+      console.log('🔄 Setting colleges state...');
+      setColleges(data.colleges);
+      console.log('✅ Colleges state set successfully');
+      
+      // Explicitly clear error if we get here
+      setError(null);
+      
     } catch (err) {
-      console.error('❌ API Error occurred:', err.message);
-      console.error('❌ Full error object:', err);
-      console.error('❌ Error stack:', err.stack);
-      setError(err.message);
-      // No fallback data - show error message instead
+      console.error('❌ API Error occurred:', {
+        message: err.message,
+        name: err.name,
+        stack: err.stack
+      });
+      
+      // More specific error messages
+      let errorMessage;
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        errorMessage = 'Network connection error - unable to reach backend server';
+      } else if (err.message.includes('CORS')) {
+        errorMessage = 'CORS policy error - backend not allowing cross-origin requests';
+      } else if (err.message.includes('HTTP 4') || err.message.includes('HTTP 5')) {
+        errorMessage = `Server error: ${err.message}`;
+      } else {
+        errorMessage = `Database connection failed: ${err.message}`;
+      }
+      
+      setError(errorMessage);
       setColleges([]);
     } finally {
       console.log('🔄 Setting loading to false...');
       setLoading(false);
+      setFetchInProgress(false);
     }
   };
 
   // Fetch colleges on component mount and when search/filter changes
   useEffect(() => {
-    fetchColleges(searchQuery, filterType);
+    // Add a small delay to prevent rapid successive calls
+    const timeoutId = setTimeout(() => {
+      fetchColleges(searchQuery, filterType);
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
   }, [searchQuery, filterType]);
 
   // Debug effect to track state changes
