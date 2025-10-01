@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useNavigate } from 'react-router-dom';
 import { API_CONFIG } from '../config/api';
 
@@ -9,11 +9,30 @@ const Chatbot = ({ disableAutoScroll = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [genAI, setGenAI] = useState(null);
+  const [model, setModel] = useState(null);
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const hasInitialized = useRef(false);
   const inputRef = useRef(null);
+  
+  // Initialize the Google Generative AI client
+  useEffect(() => {
+    try {
+      console.log('Initializing Google Generative AI client...');
+      const googleAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_AI_KEY);
+      setGenAI(googleAI);
+      
+      // Use a model that is known to be available
+      const geminiModel = googleAI.getGenerativeModel({ model: "gemini-pro" });
+      setModel(geminiModel);
+      console.log('Google Generative AI client initialized successfully with gemini-pro model');
+    } catch (error) {
+      console.error('Failed to initialize Google Generative AI client:', error);
+      addToConversation("Sorry, I'm having trouble connecting to the AI service right now. Please try again later.", 'ai');
+    }
+  }, []);
   
   // Check if query is within allowed topics - enhanced with comprehensive career fields
   const isAllowedTopic = (query) => {
@@ -81,16 +100,45 @@ const Chatbot = ({ disableAutoScroll = false }) => {
       'olympics', 'professional sports', 'sports management', 'coach',
       'youtuber', 'content creator', 'influencer', 'streamer', 'social media career',
       'performing arts', 'entertainment career', 'celebrity', 'fame',
+      'cricket', 'football', 'basketball', 'tennis', 'badminton', 'swimming', 'golf', 'hockey',
+      'sportsman', 'sportswoman', 'professional athlete', 'sports professional',
+      'model', 'fashion model', 'tv actor', 'film actor', 'bollywood', 'hollywood',
+      'director', 'producer', 'screenwriter', 'script writer', 'filmmaker',
+      'dancer', 'choreographer', 'dance teacher', 'ballet dancer', 'contemporary dance',
+      'singer', 'vocalist', 'pop singer', 'rock star', 'musician', 'band',
+      'comedian', 'stand-up comedy', 'voice actor', 'radio jockey', 'dj',
       
       // Military and Government Services
       'army', 'navy', 'air force', 'military', 'defense', 'soldier',
       'police', 'law enforcement', 'firefighter', 'emergency services',
       'government job', 'civil service', 'public administration',
       'indian army', 'navy', 'air force', 'paramilitary',
+      'intelligence officer', 'detective', 'forensic scientist', 'customs officer',
+      'diplomat', 'ambassador', 'politician', 'political scientist',
       
       // Culinary and Hospitality
       'chef', 'cooking career', 'culinary', 'baking', 'pastry', 'restaurant',
       'hotel management', 'catering', 'food service', 'nutrition',
+      'pastry chef', 'sous chef', 'executive chef', 'food critic', 'restaurant owner',
+      'bartender', 'barista', 'sommelier', 'food blogger', 'cooking show host',
+      'catering business', 'food styling', 'culinary arts', 'gastronomy',
+      
+      // Creative and Arts
+      'artist', 'painter', 'sculptor', 'illustrator', 'graphic designer',
+      'photographer', 'photojournalist', 'videographer', 'cinematographer',
+      'writer', 'author', 'novelist', 'poet', 'blogger', 'copywriter',
+      'editor', 'publisher', 'journalist', 'reporter', 'news anchor',
+      'fashion designer', 'interior designer', 'landscape designer',
+      'architect', 'urban planner', 'cartoonist', 'animator', 'game designer',
+      'ux designer', 'ui designer', 'web designer', 'app designer',
+      'craftsman', 'potter', 'jewelry designer', 'textile designer',
+      
+      // Media and Communication
+      'media', 'communication', 'public relations', 'marketing',
+      'social media manager', 'content manager', 'digital marketing',
+      'seo specialist', 'sem specialist', 'email marketing',
+      'broadcasting', 'radio', 'television', 'podcast', 'youtube',
+      'media planner', 'advertising', 'brand manager', 'pr manager',
       
       // Skilled Trades and Vocational
       'vocational', 'diploma', 'mechanic', 'fashion design', 'hotel management', 'skilled trade',
@@ -102,7 +150,76 @@ const Chatbot = ({ disableAutoScroll = false }) => {
       'emergency medical technician', 'paramedic', 'dental assistant',
       'veterinary assistant', 'agriculture', 'horticulture', 'landscaping',
       'aviation', 'pilot', 'flight attendant', 'air traffic control',
-      'maritime', 'shipping', 'logistics', 'warehouse management'
+      'maritime', 'shipping', 'logistics', 'warehouse management',
+      'electrician', 'plumber', 'welder', 'machinist', 'tool and die maker',
+      'automotive technician', 'motorcycle mechanic', 'boat mechanic',
+      'locksmith', 'security system installer', 'solar panel installer',
+      'telecom technician', 'computer repair technician', 'electronics technician',
+      
+      // Wellness and Personal Care
+      'yoga instructor', 'fitness coach', 'personal trainer', 'nutritionist',
+      'dietitian', 'massage therapist', 'spa manager', 'beauty therapist',
+      'life coach', 'career counselor', 'therapist', 'psychologist',
+      'acupuncturist', 'naturopath', 'herbalist', 'aromatherapist',
+      
+      // Business and Entrepreneurship
+      'entrepreneur', 'startup founder', 'small business owner',
+      'franchise owner', 'ecommerce business', 'online business',
+      'consultant', 'freelancer', 'freelance writer', 'freelance designer',
+      'event planner', 'wedding planner', 'party planner',
+      'real estate agent', 'property manager', 'appraiser',
+      'insurance agent', 'travel agent', 'wedding planner',
+      
+      // Technology and Innovation
+      'software developer', 'web developer', 'app developer',
+      'data scientist', 'cybersecurity expert', 'network administrator',
+      'it consultant', 'systems analyst', 'database administrator',
+      'ux researcher', 'product manager', 'technical writer',
+      'game developer', 'mobile app developer', 'web designer',
+      'blockchain developer', 'ai specialist', 'machine learning engineer',
+      'robotics engineer', 'drone pilot', '3d printing specialist',
+      
+      // Education and Research
+      'teacher', 'professor', 'lecturer', 'tutor', 'instructor',
+      'school principal', 'education administrator', 'curriculum developer',
+      'research scientist', 'lab technician', 'research assistant',
+      'academic researcher', 'policy researcher', 'market researcher',
+      
+      // Healthcare and Medicine
+      'doctor', 'physician', 'surgeon', 'dentist', 'veterinarian',
+      'nurse', 'nursing assistant', 'medical assistant',
+      'pharmacist', 'pharmacy technician', 'medical technician',
+      'physical therapist', 'occupational therapist', 'speech therapist',
+      'radiologist', 'anesthesiologist', 'cardiologist', 'neurologist',
+      'psychiatrist', 'dermatologist', 'pediatrician', 'gynecologist',
+      
+      // Legal and Law Enforcement
+      'lawyer', 'attorney', 'judge', 'prosecutor', 'public defender',
+      'legal assistant', 'paralegal', 'court reporter', 'mediator',
+      'private investigator', 'security consultant', 'cybersecurity analyst',
+      
+      // Environmental and Agriculture
+      'environmental scientist', 'conservationist', 'wildlife biologist',
+      'forester', 'park ranger', 'agronomist', 'horticulturist',
+      'farm manager', 'agricultural engineer', 'soil scientist',
+      'marine biologist', 'oceanographer', 'meteorologist',
+      
+      // Arts and Culture
+      'museum curator', 'art historian', 'archaeologist', 'anthropologist',
+      'historian', 'librarian', 'archivist', 'cultural heritage manager',
+      'gallery director', 'art dealer', 'auctioneer', 'art restorer',
+      
+      // Transportation and Logistics
+      'truck driver', 'delivery driver', 'taxi driver', 'uber driver',
+      'pilot', 'co-pilot', 'flight engineer', 'air traffic controller',
+      'ship captain', 'marine engineer', 'port manager', 'logistics coordinator',
+      'supply chain manager', 'warehouse manager', 'inventory specialist',
+      
+      // Finance and Accounting
+      'accountant', 'auditor', 'financial analyst', 'investment banker',
+      'stockbroker', 'financial advisor', 'insurance underwriter',
+      'tax consultant', 'credit analyst', 'treasury analyst',
+      'real estate appraiser', 'mortgage broker', 'loan officer',
     ];
     
     // Define off-topic keywords that should be rejected
@@ -142,7 +259,8 @@ const Chatbot = ({ disableAutoScroll = false }) => {
       'how do i become', 'how to become', 'want to be', 'want to work as',
       'interested in becoming', 'dream of being', 'aspire to be',
       'make a living as', 'earn money as', 'build a career as',
-      'study to become', 'course for', 'education for', 'what should i study'
+      'study to become', 'course for', 'education for', 'what should i study',
+      'want to become', 'i want to become', 'i want to be', 'i aspire to be'
     ];
     
     const hasCareerAspiration = careerAspirationPhrases.some(phrase => 
@@ -196,7 +314,7 @@ const Chatbot = ({ disableAutoScroll = false }) => {
     setConversation([
       {
         id: 1,
-        text: "Hello! I'm your AI Career Guidance Assistant. I can help you explore various career paths across Science, Commerce, Arts, and Vocational fields. Whether you're interested in technology, business, creative arts, or skilled trades, I can provide guidance on career opportunities, required skills, education options, resume writing, interview preparation, and industry insights.\n\nWhat would you like to know about your career today?",
+        text: "Hello! I'm your AI Career Guidance Assistant. I can help you explore career paths across ALL fields - Science & Technology, Commerce & Business, Arts & Creative, Vocational & Skilled Trades, Sports & Athletics, Entertainment & Media, Culinary Arts, Wellness & Personal Care, Legal & Law Enforcement, Healthcare & Medicine, Education & Research, Government & Military Services, Environmental & Agriculture, Transportation & Logistics, and Finance & Accounting. Whether you're interested in becoming a chef, actor, software developer, teacher, athlete, or anything else, I can provide comprehensive guidance on career opportunities, required skills, education options, resume writing, interview preparation, and industry insights.\n\nWhat would you like to know about your career today?",
         sender: 'ai',
         timestamp: new Date()
       }
@@ -285,41 +403,57 @@ const Chatbot = ({ disableAutoScroll = false }) => {
     setIsLoading(true);
     
     try {
-      console.log('Sending request to AI API with key:', API_CONFIG.GOOGLE_AI_KEY.substring(0, 10) + '...');
-      
-      // Updated to use gemini-1.5-flash which is available in v1beta
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_CONFIG.GOOGLE_AI_KEY}`,
-        {
-          contents: [{
-            parts: [{
-              text: `As an AI career guidance assistant, please provide a helpful and concise response to this career-related question: "${message}".\n\n` +
-                `Focus on topics like career paths across Science (Technology, Engineering, Research), Commerce (Business, Finance, Marketing), ` +
-                `Arts (Creative, Media, Humanities), and Vocational (Skilled Trades, Healthcare, Service) fields. ` +
-                `Include information on job opportunities, skill development, education options, resume writing, ` +
-                `interview preparation, industry trends, professional growth, and workplace insights.\n` +
-                `If the question is not career-related, politely redirect the user to ask career-related questions.\n` +
-                `Keep your response professional, informative, and focused on career guidance.`
-            }]
-          }]
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          timeout: 30000 // 30 second timeout
-        }
-      );
-      
-      console.log('AI API response:', response.data);
-      
-      // Check if the response has the expected structure
-      if (!response.data.candidates || response.data.candidates.length === 0) {
-        throw new Error('No candidates in AI response');
+      // Check if AI client is initialized
+      if (!genAI || !model) {
+        throw new Error('AI service not properly initialized');
       }
       
-      const aiResponse = response.data.candidates?.[0]?.content?.parts?.[0]?.text || 
-        'Sorry, I could not process that request.';
+      console.log('Sending request to AI API with key:', API_CONFIG.GOOGLE_AI_KEY.substring(0, 10) + '...');
+      
+      // Using the official Google Generative AI SDK
+      const prompt = `As an AI career guidance assistant, please provide a comprehensive and detailed response to this career-related question: "${message}".\n\n` +
+        `Focus on career paths across ALL relevant domains, including but not limited to:\n` +
+        `1. Science & Technology (AI, Data Science, Engineering, Research, etc.)\n` +
+        `2. Commerce & Business (Finance, Marketing, Entrepreneurship, etc.)\n` +
+        `3. Arts & Creative (Design, Media, Literature, Performing Arts, etc.)\n` +
+        `4. Vocinal & Skilled Trades (Mechanics, Healthcare, Culinary, etc.)\n` +
+        `5. Sports & Athletics (Professional sports, coaching, sports management, etc.)\n` +
+        `6. Entertainment & Media (Acting, Music, Dance, Content Creation, etc.)\n` +
+        `7. Culinary Arts (Chef, Restaurant Management, Food Criticism, etc.)\n` +
+        `8. Wellness & Personal Care (Fitness, Nutrition, Therapy, etc.)\n` +
+        `9. Legal & Law Enforcement (Lawyer, Police, Security, etc.)\n` +
+        `10. Healthcare & Medicine (Doctor, Nurse, Pharmacist, etc.)\n` +
+        `11. Education & Research (Teacher, Professor, Scientist, etc.)\n` +
+        `12. Government & Military Services (Civil Service, Armed Forces, etc.)\n` +
+        `13. Environmental & Agriculture (Conservation, Farming, etc.)\n` +
+        `14. Transportation & Logistics (Driving, Aviation, Shipping, etc.)\n` +
+        `15. Finance & Accounting (Accountant, Financial Analyst, etc.)\n\n` +
+        `For ANY career-related query, provide detailed guidance on:\n` +
+        `- Direct paths to the profession (training, education, skill development)\n` +
+        `- Supporting careers in the field (related jobs, auxiliary roles)\n` +
+        `- Education and certification requirements\n` +
+        `- Industry trends and opportunities\n` +
+        `- Professional growth paths\n` +
+        `- Resume writing and interview preparation specific to the field\n` +
+        `- Workplace insights and culture\n` +
+        `- Salary expectations and job market outlook\n\n` +
+        `Always structure your response with clear sections for:\n` +
+        `1. Job Opportunities\n` +
+        `2. Skill Development\n` +
+        `3. Education Options\n` +
+        `4. Industry Trends\n` +
+        `5. Professional Growth\n` +
+        `6. Resume & Interview Preparation\n` +
+        `7. Workplace Insights\n\n` +
+        `If the question is not career-related, politely redirect the user to ask career-related questions.\n` +
+        `Keep your response professional, comprehensive, and focused on career guidance.`;
+      
+      // Add a small delay to help with rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const aiResponse = response.text();
       
       console.log('AI response text:', aiResponse);
       
@@ -327,28 +461,23 @@ const Chatbot = ({ disableAutoScroll = false }) => {
       addToConversation(aiResponse, 'ai');
     } catch (error) {
       console.error('AI API Error:', error);
-      console.error('Error response:', error.response?.data);
       
       let errorMsg = "Sorry, I'm having trouble connecting to the AI service right now. Please try again later.";
       
       // More detailed error handling
-      if (error.code === 'ECONNABORTED') {
+      if (error.message.includes('API_KEY_INVALID')) {
+        errorMsg = "Invalid API key. Please contact the administrator.";
+      } else if (error.message.includes('RATE_LIMIT') || error.status === 429) {
+        errorMsg = "The AI service is currently experiencing high demand. Please wait a moment and try again.";
+      } else if (error.message.includes('SAFETY')) {
+        errorMsg = "Your request was blocked for safety reasons. Please rephrase your question.";
+      } else if (error.message.includes('AI service not properly initialized')) {
+        errorMsg = "AI service is not properly configured. Please contact the administrator.";
+      } else if (error.name === 'GoogleGenerativeAIError') {
+        errorMsg = `AI Service Error: ${error.message}`;
+      } else if (error.name === 'TimeoutError') {
         errorMsg = "The request timed out. Please try again.";
-      } else if (error.response) {
-        // Server responded with error status
-        if (error.response.status === 401) {
-          errorMsg = "Invalid API key. Please contact the administrator.";
-        } else if (error.response.status === 429) {
-          errorMsg = "Too many requests. Please wait a moment and try again.";
-        } else if (error.response.status === 400) {
-          errorMsg = "Invalid request. Please rephrase your question.";
-        } else if (error.response.status >= 500) {
-          errorMsg = "AI service is temporarily unavailable. Please try again later.";
-        } else if (error.response.data?.error?.message) {
-          errorMsg = `AI Service Error: ${error.response.data.error.message}`;
-        }
-      } else if (error.request) {
-        // Request was made but no response received
+      } else if (error.name === 'NetworkError') {
         errorMsg = "Network error. Please check your internet connection and try again.";
       }
       

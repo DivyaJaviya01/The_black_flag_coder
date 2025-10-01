@@ -1,7 +1,7 @@
-const axios = require('axios');
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Import API configuration
-const { API_CONFIG } = require('./src/config/api');
+import { API_CONFIG } from './src/config/api.js';
 
 // Predefined categories with representative keywords
 const CATEGORIES = {
@@ -37,34 +37,24 @@ function cosineSimilarity(vecA, vecB) {
   return dotProduct / (magnitudeA * magnitudeB);
 }
 
+// Initialize the Google Generative AI client
+const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_AI_KEY);
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+
 // Function to get embeddings for an array of texts using Gemini API
 async function getEmbeddings(texts) {
   try {
     const embeddings = [];
     
     for (const text of texts) {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key=${API_CONFIG.GOOGLE_AI_KEY}`,
-        {
-          content: {
-            parts: [{
-              text: text
-            }]
-          }
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-      
-      embeddings.push(response.data.embedding.values);
+      const result = await embeddingModel.embedContent(text);
+      const embedding = result.embedding;
+      embeddings.push(embedding.values);
     }
     
     return embeddings;
   } catch (error) {
-    console.error('Error getting embeddings:', error.response?.data || error.message);
+    console.error('Error getting embeddings:', error.message);
     throw error;
   }
 }
@@ -152,12 +142,12 @@ async function runClassifier() {
 }
 
 // Run the classifier if this file is executed directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   runClassifier();
 }
 
 // Export functions for use in other modules
-module.exports = {
+export {
   initializeCategoryEmbeddings,
   classifyQuery,
   cosineSimilarity

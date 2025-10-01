@@ -71,3 +71,11 @@ All Scores:
 ## Integration with Your Existing Project
 
 This classifier uses the same API configuration as your existing project, so it will automatically use your configured Gemini API key from `src/config/api.js`.
+
+## Updated Implementation
+
+The project now uses the official Google Generative AI SDK (@google/generative-ai) for better reliability, error handling, and future compatibility. The SDK provides:
+- Improved error handling with specific error types
+- Better timeout management
+- Easier model switching
+- Official support from Google

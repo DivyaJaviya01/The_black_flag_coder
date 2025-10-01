@@ -1,11 +1,19 @@
-# Query Classifier using OpenAI Embeddings
+# Career Guidance Platform - M-Frontend
 
-This Node.js application classifies user queries into predefined categories (Science, Commerce, Arts, Vocational) using OpenAI embeddings and cosine similarity.
+This React-based frontend application assists users in career exploration and guidance. It integrates AI-powered query classification to understand user intent and provide personalized recommendations in domains such as Science, Commerce, Arts, and Vocational fields.
+
+## Features
+
+- **AI-Powered Query Classification**: Uses OpenAI or Google Gemini embeddings and cosine similarity to categorize user queries
+- **Interactive Chatbot**: Integrated via `react-chatbot-kit` for conversational UX
+- **Career Assessment & Roadmaps**: Visual diagrams and assessments to guide users
+- **Navigation & Information Pages**: Includes Home, About, Colleges, Trending Jobs, Privacy, Terms, etc.
+- **Authentication Modal**: Supports sign-in flows
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
-- An OpenAI API key
+- An OpenAI API key OR a Google Gemini API key
 
 ## Installation
 
@@ -17,6 +25,7 @@ This Node.js application classifies user queries into predefined categories (Sci
 
 ## Setup
 
+### For OpenAI API:
 1. Set your OpenAI API key as an environment variable:
    
    On Windows (PowerShell):
@@ -29,19 +38,37 @@ This Node.js application classifies user queries into predefined categories (Sci
    export OPENAI_API_KEY="your-api-key-here"
    ```
 
+### For Google Gemini API:
+1. Set your Google Gemini API key in `src/config/api.js`:
+   ```javascript
+   // API configuration
+   export const API_CONFIG = {
+     // Google AI API key
+     GOOGLE_AI_KEY: 'your-gemini-api-key-here',
+     // ... other config
+   };
+   ```
+
 ## Usage
 
-Run the classifier:
+Start the development server:
 ```bash
-npm start
+npm run dev
 ```
 
-Or directly with Node:
+Build for production:
 ```bash
-node query-classifier.js
+npm run build
+```
+
+Preview production build:
+```bash
+npm run preview
 ```
 
 ## How It Works
+
+The application uses AI embeddings and cosine similarity to classify user queries into career-related categories:
 
 1. The application initializes by creating embeddings for predefined keywords in each category
 2. For each category, it averages the embeddings to create a representative vector
@@ -49,18 +76,23 @@ node query-classifier.js
 4. Cosine similarity is calculated between the query embedding and each category embedding
 5. The category with the highest similarity score is returned
 
+## Technology Stack
+
+- React v19.1.1
+- React DOM v19.1.1
+- React Router DOM v7.9.1
+- Vite v7.1.6 (Build Tool)
+- Tailwind CSS v3.4.0 (Styling)
+- Axios v1.12.2: HTTP client for API communication
+- react-chatbot-kit v2.2.2: Chatbot interface
+- @heroicons/react v2.1.5: Icon library
+- @google/generative-ai: Official Google Generative AI SDK for Gemini integration
+
 ## Customization
 
-You can modify the categories and keywords in the `CATEGORIES` object in `query-classifier.js`:
-
-```javascript
-const CATEGORIES = {
-  science: ["science", "physics", "chemistry", "biology", "mathematics", "computer science"],
-  commerce: ["commerce", "accounting", "finance", "business", "economics", "marketing"],
-  arts: ["arts", "history", "literature", "philosophy", "psychology", "political science"],
-  vocational: ["vocational", "diploma", "mechanic", "fashion design", "hotel management", "skilled trade"]
-};
-```
+You can modify the categories and keywords in the classifier files:
+- For OpenAI: `query-classifier.js`
+- For Google Gemini: `gemini-query-classifier.js`
 
 ## Example Output
 
