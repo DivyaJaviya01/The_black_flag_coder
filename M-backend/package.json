@@ -17,6 +17,8 @@
     "start:5173": "node Server.cjs 5173",
     "start:4000": "node Server.cjs 4000",
     "start:8080": "node Server.cjs 8080",
+    "check-ports": "start port-status-checker.html",
+    "dev-monitor": "start port-status-checker.html && nodemon Server.cjs",
     "test:ports": "node ../port-connectivity-test.js",
     "test:ports:json": "node ../port-connectivity-test.js --json",
     "test:ports:web": "start ../port-connectivity-test.html"

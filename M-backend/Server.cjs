@@ -9,27 +9,48 @@ const { MongoClient } = require("mongodb");
 // 2. Setup App and Middleware
 const app = express();
 
-// Specific port configuration - tries ALL ports in preferred order
-const PREFERRED_PORTS = [3000, 3001, 3002, 5174, 8000, 5000, 3003, 8001, 5173, 4000, 8080];
+// Development ports configuration - matches port checker
+const DEVELOPMENT_PORTS = [3000, 3001, 3002, 5174, 8000, 5000, 3003, 8001, 5173, 4000, 8080];
 const REQUESTED_PORT = parseInt(process.argv[2]) || parseInt(process.env.PORT) || null;
+const MULTI_PORT_MODE = process.argv.includes('--multi-port') || process.env.MULTI_PORT === 'true';
 
-console.log(`🚀 Starting server...`);
+console.log(`🚀 Starting Enhanced Development Server...`);
+console.log(`🔧 Mode: ${MULTI_PORT_MODE ? 'Multi-Port' : 'Single Port'}`);
 if (REQUESTED_PORT) {
   console.log(`🎯 Requested port: ${REQUESTED_PORT}`);
 } else {
-  console.log(`🎯 Will try all preferred ports: ${PREFERRED_PORTS.join(', ')}`);
+  console.log(`🎯 Available development ports: ${DEVELOPMENT_PORTS.join(', ')}`);
 }
 console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
+console.log(`📊 Port Status Checker: http://localhost:[PORT]/port-status`);
 
 // Enhanced CORS configuration for all ports
 const CORS_ORIGIN = process.env.CORS_ORIGIN || [];
 
-// Function to check if port is in preferred list
-function isPreferredPort(port) {
-  return PREFERRED_PORTS.includes(port);
+// Function to check if port is in development list
+function isDevelopmentPort(port) {
+  return DEVELOPMENT_PORTS.includes(port);
 }
 
-// Universal CORS configuration for preferred ports
+// Function to get port configuration
+function getPortConfig(port) {
+  const configs = {
+    3000: { name: 'Node.js/React Dev', description: 'Primary development server' },
+    3001: { name: 'Backend API', description: 'Express.js API server' },
+    3002: { name: 'Secondary Dev', description: 'Alternative development server' },
+    3003: { name: 'Third Dev Server', description: 'Additional development port' },
+    4000: { name: 'Web Server', description: 'Alternative web server' },
+    5000: { name: 'Express API', description: 'Common Express.js port' },
+    5173: { name: 'Vite Dev Server', description: 'Vite development (default)' },
+    5174: { name: 'Vite Alt Server', description: 'Vite development (alternative)' },
+    8000: { name: 'HTTP Server', description: 'Standard HTTP server' },
+    8001: { name: 'Alt HTTP Server', description: 'Alternative HTTP server' },
+    8080: { name: 'Spring/Tomcat', description: 'Spring Boot or Tomcat server' }
+  };
+  return configs[port] || { name: 'Unknown Service', description: 'Custom port' };
+}
+
+// Enhanced CORS configuration for development ports
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (Postman, mobile apps, local files)
@@ -70,6 +91,11 @@ app.use((req, res, next) => {
 // Serve static files from public directory
 app.use(express.static('public'));
 
+// Serve port status checker
+app.get('/port-status', (req, res) => {
+  res.sendFile(__dirname + '/port-status-checker.html');
+});
+
 // 3. Setup MongoDB Connection
 const mongoUri = process.env.MONGODB_URI;
 if (!mongoUri) {
@@ -93,14 +119,20 @@ async function connectDB() {
   }
 }
 
-// Graceful shutdown function
+// Enhanced graceful shutdown function
 async function gracefulShutdown() {
   console.log("\n🔄 Shutting down gracefully...");
   try {
+    if (global.currentServer) {
+      global.currentServer.close(() => {
+        console.log(`✅ Server on port ${global.currentPort} closed.`);
+      });
+    }
     if (client) {
       await client.close();
       console.log("✅ MongoDB connection closed.");
     }
+    console.log("👋 Goodbye!");
     process.exit(0);
   } catch (err) {
     console.error("❌ Error during shutdown:", err);
@@ -123,13 +155,44 @@ function validateApiRequest(req, res, next) {
   next();
 }
 
-// 5. Health check endpoint
+// 5. Enhanced health check endpoint
 app.get("/api/health", (req, res) => {
+  const currentPort = req.get('host')?.split(':')[1] || 'unknown';
+  const portConfig = getPortConfig(parseInt(currentPort));
+  
   res.json({ 
     status: "OK", 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    database: db ? "connected" : "disconnected"
+    database: db ? "connected" : "disconnected",
+    server: {
+      port: currentPort,
+      name: portConfig.name,
+      description: portConfig.description,
+      isDevelopmentPort: isDevelopmentPort(parseInt(currentPort))
+    },
+    environment: process.env.NODE_ENV || 'development',
+    version: '2.0.0'
+  });
+});
+
+// Port status API endpoint
+app.get("/api/port-status", (req, res) => {
+  const currentPort = req.get('host')?.split(':')[1] || 'unknown';
+  
+  res.json({
+    success: true,
+    currentPort: parseInt(currentPort),
+    developmentPorts: DEVELOPMENT_PORTS.map(port => ({
+      port,
+      ...getPortConfig(port),
+      isActive: parseInt(currentPort) === port
+    })),
+    server: {
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      database: db ? "connected" : "disconnected"
+    }
   });
 });
 
@@ -780,9 +843,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 9. Start the Server - Try ALL preferred ports in order
+// 9. Enhanced Server Startup - Try ALL development ports in order
 connectDB().then(() => {
-  const tryPort = (portIndex = 0) => {
+  const startServer = (portIndex = 0) => {
     let currentPort;
     
     // If specific port was requested via command line or environment
@@ -790,37 +853,49 @@ connectDB().then(() => {
       currentPort = REQUESTED_PORT;
       console.log(`🎯 Trying requested port: ${currentPort}`);
     } else {
-      // Calculate the correct index for preferred ports
-      const preferredIndex = REQUESTED_PORT ? portIndex - 1 : portIndex;
+      // Calculate the correct index for development ports
+      const developmentIndex = REQUESTED_PORT ? portIndex - 1 : portIndex;
       
-      if (preferredIndex >= PREFERRED_PORTS.length) {
-        console.error(`❌ All preferred ports [${PREFERRED_PORTS.join(', ')}] are in use`);
+      if (developmentIndex >= DEVELOPMENT_PORTS.length) {
+        console.error(`❌ All development ports [${DEVELOPMENT_PORTS.join(', ')}] are in use`);
+        console.log(`💡 Tip: Use 'npm run start:[PORT]' to start on a specific port`);
         process.exit(1);
       }
       
-      currentPort = PREFERRED_PORTS[preferredIndex];
-      console.log(`🎯 Trying preferred port: ${currentPort} (${preferredIndex + 1}/${PREFERRED_PORTS.length})`);
+      currentPort = DEVELOPMENT_PORTS[developmentIndex];
+      const portConfig = getPortConfig(currentPort);
+      console.log(`🎯 Trying ${portConfig.name} on port ${currentPort} (${developmentIndex + 1}/${DEVELOPMENT_PORTS.length})`);
     }
     
     const server = app.listen(currentPort, () => {
-      console.log(`✅ Server running on http://localhost:${currentPort}`);
-      console.log(`📊 Database: Connected to MongoDB Atlas`);
-      console.log(`🔗 CORS: Enabled for localhost origins`);
-      console.log(`🎉 Ready to serve requests!`);
+      const portConfig = getPortConfig(currentPort);
+      console.log(`\n✅ ${portConfig.name} started successfully!`);
+      console.log(`🌐 Server URL: http://localhost:${currentPort}`);
+      console.log(`📊 Port Status: http://localhost:${currentPort}/port-status`);
+      console.log(`🏥 Health Check: http://localhost:${currentPort}/api/health`);
+      console.log(`📋 Service: ${portConfig.description}`);
+      console.log(`💾 Database: Connected to MongoDB Atlas`);
+      console.log(`🔗 CORS: Enabled for all localhost origins`);
+      console.log(`🚀 Ready to serve requests!\n`);
     });
 
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
-        console.log(`⚠️  Port ${currentPort} is busy, trying next...`);
-        tryPort(portIndex + 1);
+        const portConfig = getPortConfig(currentPort);
+        console.log(`⚠️  Port ${currentPort} (${portConfig.name}) is busy, trying next...`);
+        startServer(portIndex + 1);
       } else {
         console.error('❌ Server error:', err);
         process.exit(1);
       }
     });
+    
+    // Store server reference for potential multi-port mode
+    global.currentServer = server;
+    global.currentPort = currentPort;
   };
   
-  tryPort();
+  startServer();
   
 }).catch((err) => {
   console.error("❌ Failed to start server:", err);
