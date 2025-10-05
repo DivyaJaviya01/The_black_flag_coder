@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Card Template</title>
+    <style>
+        /* Google Fonts for a clean look */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .college-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .card-header {
+            background-color: #4A90E2; /* A nice blue header */
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .card-header p {
+            margin: 0.25rem 0 0;
+            font-size: 1rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eeeeee;
+        }
+        
+        .card-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .card-section h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 1rem 0;
+        }
+
+        .card-section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item strong {
+            color: #333;
+            min-width: 150px; /* Aligns values */
+        }
+        
+        .info-item span {
+            color: #666;
+        }
+
+        .list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+        }
+
+        .list li {
+            background-color: #f9f9f9;
+            border-left: 3px solid #4A90E2;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            color: #555;
+        }
+        
+        .recruiters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .recruiter-tag {
+            background-color: #eaf2fa;
+            color: #4A90E2;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+
+    <article class="college-card">
+        <header class="card-header">
+            <h1>&lt;-college_name-&gt;</h1>
+            <p>&lt;-location-&gt;, &lt;-city-&gt;</p>
+        </header>
+
+        <div class="card-body">
+            <section class="card-section">
+                <h2>🏛️ Overview</h2>
+                <div class="info-item">
+                    <strong>Specialization:</strong>
+                    <span>&lt;-specialization-&gt;</span>
+                </div>
+            </section>
+            
+            <section class="card-section">
+                <h2>📚 Courses Offered</h2>
+                <h4>Undergraduate</h4>
+                <ul class="list">
+                    <li>&lt;-undergraduate_course_1-&gt;</li>
+                    </ul>
+                <h4>Postgraduate</h4>
+                <ul class="list">
+                    <li>&lt;-postgraduate_course_1-&gt;</li>
+                     </ul>
+            </section>
+
+            <section class="card-section">
+                <h2>⭐ Recommendation</h2>
+                 <div class="info-item">
+                    <strong>Rankings:</strong>
+                    <span>&lt;-rankings-&gt;</span>
+                </div>
+                <h4>Strengths</h4>
+                <ul class="list">
+                    <li>&lt;-strength_1-&gt;</li>
+                    <li>&lt;-strength_2-&gt;</li>
+                    </ul>
+            </section>
+            
+            <section class="card-section">
+                <h2>💼 Placements</h2>
+                <div class="info-item">
+                    <strong>Highest Package:</strong>
+                    <span>&lt;-highest_package-&gt;</span>
+                </div>
+                <div class="info-item">
+                    <strong>Average Package:</strong>
+                    <span>&lt;-average_package-&gt;</span>
+                </div>
+                <h4>Top Recruiters</h4>
+                <div class="recruiters">
+                    <span class="recruiter-tag">&lt;-recruiter_1-&gt;</span>
+                    <span class="recruiter-tag">&lt;-recruiter_2-&gt;</span>
+                    <span class="recruiter-tag">&lt;-recruiter_3-&gt;</span>
+                    </div>
+            </section>
+
+            <section class="card-section">
+                <h2>🪑 Seats & Admissions</h2>
+                 <div class="info-item">
+                    <strong>Total UG Seats:</strong>
+                    <span>&lt;-total_undergraduate_seats-&gt;</span>
+                </div>
+                 <div class="info-item">
+                    <strong>Note:</strong>
+                    <span>&lt;-notes-&gt;</span>
+                </div>
+            </section>
+
+             <section class="card-section">
+                <h2>💰 Fees</h2>
+                 <div class="info-item">
+                    <strong>Type:</strong>
+                    <span>&lt;-type-&gt;</span>
+                </div>
+                 <div class="info-item">
+                    <strong>UG Total (3 Yrs):</strong>
+                    <span>&lt;-undergraduate_total-&gt;</span>
+                </div>
+            </section>
+        </div>
+    </article>
+
+</body>
+</html>

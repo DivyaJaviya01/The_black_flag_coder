@@ -1,0 +1,76 @@
+[
+  {
+    "college_name": "Hindu College",
+    "city": "New Delhi, India",
+    "location": "North Campus, University of Delhi",
+    "specialization": "Arts, Science, and Commerce",
+    "courses_offered": {
+      "undergraduate": [
+        "B.A. (Hons) in English, Economics, History, Hindi, Political Science, Sociology, Philosophy, Sanskrit, and Music",
+        "B.Sc. (Hons) in Physics, Chemistry, Mathematics, Statistics, Botany, and Zoology",
+        "B.Com (Hons)"
+      ],
+      "postgraduate": ["M.A.", "M.Sc.", "M.Com"]
+    },
+    "recommendation": {
+      "strengths": [
+        "Academic excellence",
+        "Highly qualified faculty",
+        "Vibrant student societies",
+        "Consistently ranked among the best in India"
+      ]
+    },
+    "placement": {
+      "placement_cell": "Disha",
+      "highest_package": "INR 24.8 LPA (2024)",
+      "average_package": "INR 11.4 LPA (2024)",
+      "top_recruiters": [
+        "Google","Deloitte","KPMG","McKinsey & Company","Bain & Company"
+      ]
+    },
+    "seats": {
+      "total_undergraduate_seats": "Approximately 1,263",
+      "total_postgraduate_seats": "Approximately 186",
+      "notes": "Admission is based on the CUET-UG score and is highly competitive."
+    }
+  },
+  {
+    "college_name": "Shri Ram College of Commerce (SRCC)",
+    "city": "New Delhi, India",
+    "location": "North Campus, University of Delhi",
+    "specialization": "Commerce and Economics",
+    "courses_offered": {
+      "undergraduate": ["B.Com (Hons)", "B.A. (Hons) in Economics"],
+      "postgraduate": ["M.Com", "M.A. in Economics"],
+      "diploma": ["Postgraduate Diploma in Global Business Operations (GBO)"]
+    },
+    "recommendation": {
+      "rankings": "Ranked #1 for commerce in India by India Today and The Week",
+      "strengths": [
+        "Academic Excellence: Rigorous curriculum and experienced faculty",
+        "Exceptional Placements: One of the best placement records among undergraduate colleges in India",
+        "Vibrant Campus Life: Active student societies and extracurricular activities"
+      ]
+    },
+    "fees": {
+      "type": "Government-affiliated, affordable",
+      "undergraduate_total": "₹97,260 (for 3 years)"
+    },
+    "placements": {
+      "placement_rate": "Very high",
+      "highest_package": "₹36 LPA (2024-25)",
+      "average_package": "₹9.8 LPA (2024-25)",
+      "top_recruiters": [
+        "McKinsey & Company",
+        "Boston Consulting Group",
+        "Deloitte",
+        "Accenture"
+      ]
+    },
+    "seats": {
+      "B.Com (Hons)": "793",
+      "B.A. (Hons) Economics": "124",
+      "Postgraduate Diploma in GBO": "67"
+    }
+  }
+]
