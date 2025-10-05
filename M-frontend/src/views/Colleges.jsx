@@ -228,13 +228,30 @@ const Colleges = () => {
           
           <div className="space-y-2 text-sm">
             <p><strong>Type:</strong> {college.type || 'N/A'}</p>
-            <p><strong>Location:</strong> {college.city || college.location || 'N/A'}</p>
-            <p><strong>Founded:</strong> {college.founded || 'N/A'}</p>
-            
+            <p><strong>Location:</strong> {college.location || 'N/A'}, <strong>{college.city}</strong></p>
+
             {college.specialization && (
               <p><strong>Specialization:</strong> {college.specialization}</p>
             )}
             
+          <div style={{ marginTop: '10px' }}>
+              <strong>Courses Offered:</strong><br />
+              {college.courses_offered?.undergraduate && (
+                <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                  <strong>UG:</strong> {Array.isArray(college.courses_offered.undergraduate)
+                    ? college.courses_offered.undergraduate.join(', ')
+                    : college.courses_offered.undergraduate}
+                </div>
+              )}
+              {college.courses_offered?.postgraduate && (
+                <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                  <strong>PG:</strong> {Array.isArray(college.courses_offered.postgraduate)
+                    ? college.courses_offered.postgraduate.join(', ')
+                    : college.courses_offered.postgraduate}
+                </div>
+              )}
+            </div>
+
             {college.website && (
               <p><strong>Website:</strong> 
                 <a href={college.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-1">
@@ -244,13 +261,80 @@ const Colleges = () => {
             )}
           </div>
           
+          {/* Recommendation Section */}
+          {college.recommendation && (
+                <div style={{ marginTop: '10px' }}>
+                  <strong>Recommendation:</strong><br />
+                  {college.recommendation.rankings && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Rankings:</strong> {college.recommendation.rankings}
+                    </div>
+                  )}
+                  {college.recommendation.strengths && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Strengths:</strong> {Array.isArray(college.recommendation.strengths)
+                        ? college.recommendation.strengths.join(', ')
+                        : college.recommendation.strengths}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Placements Section */}
+              {college.placement && (
+                <div style={{ marginTop: '10px' }}>
+                  <strong>Placements:</strong><br />
+                  
+                  {college.placement.highest_package && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Highest Package:</strong> {college.placement.highest_package}
+                    </div>
+                  )}
+                  {college.placement.average_package && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Average Package:</strong> {college.placement.average_package}
+                    </div>
+                  )}
+                  {college.placement.top_recruiters && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Top Recruiters:</strong> {Array.isArray(college.placement.top_recruiters)
+                        ? college.placement.top_recruiters.join(', ')
+                        : college.placement.top_recruiters}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Seats & Admissions Section */}
+              {college.seats && (
+                <div style={{ marginTop: '10px' }}>
+                  <strong>Seats & Admissions:</strong><br />
+                  
+                  {college.seats.total_undergraduate_seats && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Total Undergraduate Seats:</strong> {college.seats.total_undergraduate_seats}
+                    </div>
+                  )}
+                  {college.seats.total_postgraduate_seats && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Total Postgraduate Seats:</strong> {college.seats.total_postgraduate_seats}
+                    </div>
+                  )}
+                  {college.seats.notes && (
+                    <div style={{ marginLeft: '10px', marginTop: '5px' }}>
+                      <strong>Notes:</strong> {college.seats.notes}
+                    </div>
+                  )}
+                </div>
+              )}
+
           {/* Show raw data for debugging */}
-          <details className="mt-4">
+          {/* <details className="mt-4">
             <summary className="text-xs text-gray-500 cursor-pointer">Show Raw Data</summary>
             <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-auto">
               {JSON.stringify(college, null, 2)}
             </pre>
-          </details>
+          </details> */}
         </div>
       </div>
     );
